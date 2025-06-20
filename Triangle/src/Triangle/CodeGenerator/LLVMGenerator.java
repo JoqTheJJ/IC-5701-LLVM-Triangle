@@ -2,11 +2,15 @@ package Triangle.CodeGenerator;
 
 import Triangle.AbstractSyntaxTrees.*;
 import Triangle.SyntacticAnalyzer.SourcePosition;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LLVMGenerator implements Visitor {
 
     private StringBuilder code;
     private int tempCount;
+    private final Map<Declaration, String> llvmNames = new HashMap<>();
+
 
     public LLVMGenerator() {
         code = new StringBuilder();
@@ -45,12 +49,25 @@ public class LLVMGenerator implements Visitor {
         return null;
     }
 
+    @Override
     public Object visitAssignCommand(AssignCommand ac, Object o) {
-        // Ejemplo básico si tienes una variable n
         String val = (String) ac.E.visit(this, o);
-        code.append("  store i32 ").append(val).append(", ptr @n\n");
+
+        if (ac.V instanceof SimpleVname) {
+            SimpleVname simple = (SimpleVname) ac.V;
+
+            if (simple.D instanceof VarDeclaration) {
+                String varName = llvmNames.get(simple.D);
+                if (varName == null) varName = "@" + simple.I.spelling;
+
+                code.append("  store i32 ").append(val)
+                    .append(", ptr ").append(varName).append("\n");
+            }
+        }
+
         return null;
     }
+
 
     // Agrega más visitas según sea necesario...
 
@@ -193,14 +210,13 @@ public Object visitCallExpression(CallExpression ast, Object o) {
     public Object visitUnaryOperatorDeclaration(UnaryOperatorDeclaration ast, Object o) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-
-@Override
-public Object visitVarDeclaration(VarDeclaration ast, Object o) {
-    // Declaramos la variable como global, con valor inicial 0
-    String varName = ast.I.spelling;
-    code.insert(0, "@" + varName + " = global i32 0\n");
-    return null;
-}
+    @Override
+    public Object visitVarDeclaration(VarDeclaration ast, Object o) {
+        String varName = "@" + ast.I.spelling;
+        llvmNames.put(ast, varName);  //  esto es lo que vincula la declaración con su nombre LLVM
+        code.insert(0, varName + " = global i32 0\n");
+        return null;
+    }
 
 
     @Override
@@ -365,11 +381,25 @@ public Object visitVarDeclaration(VarDeclaration ast, Object o) {
 
     @Override
     public Object visitSimpleVname(SimpleVname ast, Object o) {
-        // Asumimos que es una variable global: %tmp = load i32, ptr @x
-        String temp = newTemp();
-        code.append("  ").append(temp).append(" = load i32, ptr @").append(ast.I.spelling).append("\n");
-        return temp;
+        // Usamos la declaración ligada durante el análisis contextual
+        if (ast.D instanceof VarDeclaration) {
+            String varName = llvmNames.get(ast.D);
+
+            if (varName == null) {
+                // Si no se ha asignado un nombre LLVM, usar el nombre textual como fallback
+                varName = "@" + ast.I.spelling;
+            }
+
+            String temp = newTemp();
+            code.append("  ").append(temp)
+                .append(" = load i32, ptr ").append(varName).append("\n");
+            return temp;
+        }
+
+        // Si no es una variable, no se puede generar código (para simplificar)
+        return null;
     }
+
     @Override
     public Object visitSubscriptVname(SubscriptVname ast, Object o) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
