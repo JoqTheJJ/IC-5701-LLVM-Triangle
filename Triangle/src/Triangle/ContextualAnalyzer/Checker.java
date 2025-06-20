@@ -38,20 +38,26 @@ public final class Checker implements Visitor {
     return null;
   }
 
+public Object visitCallCommand(CallCommand ast, Object o) {
+    if (ast.I.spelling.equals("print")) {
+        return null; // función integrada aceptada sin declaración
+    }
 
-  public Object visitCallCommand(CallCommand ast, Object o) {
     Declaration binding = (Declaration) ast.I.visit(this, null);
     if (binding == null)
-      reportUndeclared(ast.I);
+        reportUndeclared(ast.I);
     else if (binding instanceof ProcDeclaration) {
-      ast.APS.visit(this, ((ProcDeclaration) binding).FPS);
+        ast.APS.visit(this, ((ProcDeclaration) binding).FPS);
     } else if (binding instanceof ProcFormalParameter) {
-      ast.APS.visit(this, ((ProcFormalParameter) binding).FPS);
-    } else
-      reporter.reportError("\"%\" is not a procedure identifier",
-                           ast.I.spelling, ast.I.position);
+        ast.APS.visit(this, ((ProcFormalParameter) binding).FPS);
+    } else {
+        reporter.reportError("\"%\" is not a procedure identifier",
+                             ast.I.spelling, ast.I.position);
+    }
+
     return null;
-  }
+}
+
 
   public Object visitEmptyCommand(EmptyCommand ast, Object o) {
     return null;
@@ -130,22 +136,29 @@ public final class Checker implements Visitor {
     return ast.type;
   }
 
-  public Object visitCallExpression(CallExpression ast, Object o) {
+public Object visitCallExpression(CallExpression ast, Object o) {
+    if (ast.I.spelling.equals("read")) {
+        ast.type = StdEnvironment.integerType; // devuelve entero
+        return ast.type;
+    }
+
     Declaration binding = (Declaration) ast.I.visit(this, null);
     if (binding == null) {
-      reportUndeclared(ast.I);
-      ast.type = StdEnvironment.errorType;
+        reportUndeclared(ast.I);
+        ast.type = StdEnvironment.errorType;
     } else if (binding instanceof FuncDeclaration) {
-      ast.APS.visit(this, ((FuncDeclaration) binding).FPS);
-      ast.type = ((FuncDeclaration) binding).T;
+        ast.APS.visit(this, ((FuncDeclaration) binding).FPS);
+        ast.type = ((FuncDeclaration) binding).T;
     } else if (binding instanceof FuncFormalParameter) {
-      ast.APS.visit(this, ((FuncFormalParameter) binding).FPS);
-      ast.type = ((FuncFormalParameter) binding).T;
-    } else
-      reporter.reportError("\"%\" is not a function identifier",
-                           ast.I.spelling, ast.I.position);
+        ast.APS.visit(this, ((FuncFormalParameter) binding).FPS);
+        ast.type = ((FuncFormalParameter) binding).T;
+    } else {
+        reporter.reportError("\"%\" is not a function identifier",
+                             ast.I.spelling, ast.I.position);
+    }
+
     return ast.type;
-  }
+}
 
   public Object visitCharacterExpression(CharacterExpression ast, Object o) {
     ast.type = StdEnvironment.charType;
@@ -284,15 +297,14 @@ public Object visitFuncDeclaration(FuncDeclaration ast, Object o) {
     return null;
   }
 
-
 public Object visitVarDeclaration(VarDeclaration ast, Object o) {
     ast.T = (TypeDenoter) ast.T.visit(this, null);
-    ast.I.decl = ast;                      // TAM
-    idTable.enter(ast.I.spelling, ast);   // registra en tabla
-    if (ast.duplicated) {
-        reporter.reportError("identifier \"%\" already declared",
-                             ast.I.spelling, ast.position);
-    }
+    idTable.enter(ast.I.spelling, ast);
+    ast.I.decl = ast; 
+
+    if (ast.duplicated)
+        reporter.reportError("identifier \"%\" already declared", ast.I.spelling, ast.position);
+
     return null;
 }
 
@@ -643,11 +655,13 @@ public Object visitVarDeclaration(VarDeclaration ast, Object o) {
 public Object visitSimpleVname(SimpleVname ast, Object o) {
     ast.variable = false;
     ast.type = StdEnvironment.errorType;
+
     Declaration binding = (Declaration) ast.I.visit(this, null);
     if (binding == null) {
         reportUndeclared(ast.I);
     } else {
-        ast.D = binding;  //  LLVM
+        ast.D = binding;         // ← Para LLVMGenerator
+        ast.I.decl = binding;    // ← Para otros usos (incluyendo TAM)
 
         if (binding instanceof ConstDeclaration) {
             ast.type = ((ConstDeclaration) binding).E.type;
@@ -668,8 +682,6 @@ public Object visitSimpleVname(SimpleVname ast, Object o) {
     }
     return ast.type;
 }
-
-
 
   public Object visitSubscriptVname(SubscriptVname ast, Object o) {
     TypeDenoter vType = (TypeDenoter) ast.V.visit(this, null);

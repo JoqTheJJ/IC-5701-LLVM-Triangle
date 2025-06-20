@@ -27,6 +27,7 @@ public abstract class Vname extends AST {
   public boolean variable, indexed;
   public int offset;
   public TypeDenoter type;
-  public Declaration D; //para checker y llvmgenerator puedan usar la declaracion real
 
+  public Declaration D;  
 }
+
