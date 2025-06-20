@@ -2,11 +2,15 @@ package Triangle.CodeGenerator;
 
 import Triangle.AbstractSyntaxTrees.*;
 import Triangle.SyntacticAnalyzer.SourcePosition;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LLVMGenerator implements Visitor {
 
     private StringBuilder code;
     private int tempCount;
+    private final Map<Declaration, String> llvmNames = new HashMap<>();
+
 
     public LLVMGenerator() {
         code = new StringBuilder();
@@ -14,8 +18,8 @@ public class LLVMGenerator implements Visitor {
     }
 
     public String generate(Program program) {
-        code.insert(0, "declare void @printInt(i32)\n"); // declaración externa
         code.insert(0, "declare i32 @readInt()\n");
+        code.insert(0, "declare void @printInt(i32)\n");
         code.append("define i32 @main() {\n");
         program.visit(this, null);
         code.append("  ret i32 0\n");
@@ -41,28 +45,42 @@ public class LLVMGenerator implements Visitor {
     }
 
     public Object visitVname(Vname vname, Object o) {
-        // Aquí deberás mapear nombres a LLVM variables (más adelante)
+        if (vname instanceof SimpleVname) {
+            return visitSimpleVname((SimpleVname) vname, o);
+        }
         return null;
     }
 
-    public Object visitAssignCommand(AssignCommand ac, Object o) {
-        // Ejemplo básico si tienes una variable n
-        String val = (String) ac.E.visit(this, o);
-        code.append("  store i32 ").append(val).append(", ptr @n\n");
-        return null;
-    }
-
-    // Agrega más visitas según sea necesario...
 
     @Override
-    public Object visitCallCommand(CallCommand ast, Object o) {
-        if (ast.I.spelling.equals("print")) {
-            // Obtenemos el argumento de la llamada
-            String value = (String) ast.APS.visit(this, o);
+    public Object visitAssignCommand(AssignCommand ac, Object o) {
+        String val = (String) ac.E.visit(this, o);
+
+        if (ac.V instanceof SimpleVname) {
+            SimpleVname simple = (SimpleVname) ac.V;
+
+            if (simple.D instanceof VarDeclaration) {
+                String varName = llvmNames.get(simple.D);
+                if (varName == null) varName = "@" + simple.I.spelling;
+
+                code.append("  store i32 ").append(val)
+                    .append(", ptr ").append(varName).append("\n");
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Object visitCallCommand(CallCommand cmd, Object o) {
+        if (cmd.I.spelling.equals("print")) {
+            String value = (String) cmd.APS.visit(this, o);
             code.append("  call void @printInt(i32 ").append(value).append(")\n");
         }
         return null;
     }
+
+
 
 
     @Override
@@ -85,10 +103,10 @@ public class LLVMGenerator implements Visitor {
         return null;
     }
 
-
-    @Override
     public Object visitSequentialCommand(SequentialCommand ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        ast.C1.visit(this, o);
+        ast.C2.visit(this, o);
+        return null;
     }
 
     @Override
@@ -106,15 +124,17 @@ public class LLVMGenerator implements Visitor {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-@Override
-public Object visitCallExpression(CallExpression ast, Object o) {
-    if (ast.I.spelling.equals("read")) {
-        String temp = newTemp();
-        code.append("  ").append(temp).append(" = call i32 @readInt()\n");
-        return temp;
+    @Override
+    public Object visitCallExpression(CallExpression expr, Object o) {
+        if (expr.I.spelling.equals("read")) {
+            String temp = newTemp();
+            code.append("  ").append(temp).append(" = call i32 @readInt()\n");
+            return temp;
+        }
+        return null;
     }
-    return null;
-}
+
+
 
 
 
@@ -156,8 +176,9 @@ public Object visitCallExpression(CallExpression ast, Object o) {
 
     @Override
     public Object visitVnameExpression(VnameExpression ast, Object o) {
-        return ast.V.visit(this, o);
+        return ast.V.visit(this, o);  // esto permite que n dentro de print(n) funcione
     }
+
 
     @Override
     public Object visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, Object o) {
@@ -193,15 +214,13 @@ public Object visitCallExpression(CallExpression ast, Object o) {
     public Object visitUnaryOperatorDeclaration(UnaryOperatorDeclaration ast, Object o) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-
-@Override
-public Object visitVarDeclaration(VarDeclaration ast, Object o) {
-    // Declaramos la variable como global, con valor inicial 0
-    String varName = ast.I.spelling;
-    code.insert(0, "@" + varName + " = global i32 0\n");
-    return null;
-}
-
+    @Override
+    public Object visitVarDeclaration(VarDeclaration decl, Object o) {
+        String varName = "@" + decl.I.spelling;
+        llvmNames.put(decl, varName);
+        code.insert(0, varName + " = global i32 0\n");
+        return null;
+    }
 
     @Override
     public Object visitMultipleArrayAggregate(MultipleArrayAggregate ast, Object o) {
@@ -260,7 +279,7 @@ public Object visitVarDeclaration(VarDeclaration ast, Object o) {
 
     @Override
     public Object visitConstActualParameter(ConstActualParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return ast.E.visit(this, o);
     }
 
     @Override
@@ -290,7 +309,7 @@ public Object visitVarDeclaration(VarDeclaration ast, Object o) {
 
     @Override
     public Object visitSingleActualParameterSequence(SingleActualParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return ast.AP.visit(this, o);
     }
 
     @Override
@@ -363,13 +382,28 @@ public Object visitVarDeclaration(VarDeclaration ast, Object o) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
-    public Object visitSimpleVname(SimpleVname ast, Object o) {
-        // Asumimos que es una variable global: %tmp = load i32, ptr @x
+ 
+@Override
+public Object visitSimpleVname(SimpleVname ast, Object o) {
+    Declaration decl = (Declaration) ast.I.decl;  // <--- esta línea es la clave
+    System.out.println(">> visitSimpleVname: " + ast.I.spelling + ", decl=" + decl);
+
+    if (decl instanceof VarDeclaration) {
+        String varName = llvmNames.get(decl);
+        if (varName == null) {
+            varName = "@" + ast.I.spelling;
+        }
         String temp = newTemp();
-        code.append("  ").append(temp).append(" = load i32, ptr @").append(ast.I.spelling).append("\n");
+        code.append("  ").append(temp).append(" = load i32, ptr ").append(varName).append("\n");
         return temp;
     }
+
+    return null;
+}
+
+
+
+
     @Override
     public Object visitSubscriptVname(SubscriptVname ast, Object o) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

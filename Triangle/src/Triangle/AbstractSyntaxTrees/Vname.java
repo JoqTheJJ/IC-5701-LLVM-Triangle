@@ -27,4 +27,7 @@ public abstract class Vname extends AST {
   public boolean variable, indexed;
   public int offset;
   public TypeDenoter type;
+
+  public Declaration D;  
 }
+

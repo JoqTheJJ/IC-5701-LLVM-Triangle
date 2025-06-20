@@ -1,0 +1,5 @@
+let
+  var n : Integer
+in
+  n := read();
+  print(n)
