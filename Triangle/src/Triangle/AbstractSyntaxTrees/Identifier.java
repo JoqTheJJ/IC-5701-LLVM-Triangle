@@ -30,5 +30,4 @@ public class Identifier extends Terminal {
 
   public TypeDenoter type;
   public AST decl; // Either a Declaration or a FieldTypeDenoter
-
 }

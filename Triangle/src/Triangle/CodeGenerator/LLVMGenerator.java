@@ -18,8 +18,8 @@ public class LLVMGenerator implements Visitor {
     }
 
     public String generate(Program program) {
+        code.insert(0, "declare void @printInt(i32)\n"); // declaración externa
         code.insert(0, "declare i32 @readInt()\n");
-        code.insert(0, "declare void @printInt(i32)\n");
         code.append("define i32 @main() {\n");
         program.visit(this, null);
         code.append("  ret i32 0\n");
@@ -45,12 +45,9 @@ public class LLVMGenerator implements Visitor {
     }
 
     public Object visitVname(Vname vname, Object o) {
-        if (vname instanceof SimpleVname) {
-            return visitSimpleVname((SimpleVname) vname, o);
-        }
+        // Aquí deberás mapear nombres a LLVM variables (más adelante)
         return null;
     }
-
 
     @Override
     public Object visitAssignCommand(AssignCommand ac, Object o) {
@@ -71,16 +68,18 @@ public class LLVMGenerator implements Visitor {
         return null;
     }
 
+
+    // Agrega más visitas según sea necesario...
+
     @Override
-    public Object visitCallCommand(CallCommand cmd, Object o) {
-        if (cmd.I.spelling.equals("print")) {
-            String value = (String) cmd.APS.visit(this, o);
+    public Object visitCallCommand(CallCommand ast, Object o) {
+        if (ast.I.spelling.equals("print")) {
+            // Obtenemos el argumento de la llamada
+            String value = (String) ast.APS.visit(this, o);
             code.append("  call void @printInt(i32 ").append(value).append(")\n");
         }
         return null;
     }
-
-
 
 
     @Override
@@ -103,10 +102,10 @@ public class LLVMGenerator implements Visitor {
         return null;
     }
 
+
+    @Override
     public Object visitSequentialCommand(SequentialCommand ast, Object o) {
-        ast.C1.visit(this, o);
-        ast.C2.visit(this, o);
-        return null;
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -124,17 +123,15 @@ public class LLVMGenerator implements Visitor {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
-    public Object visitCallExpression(CallExpression expr, Object o) {
-        if (expr.I.spelling.equals("read")) {
-            String temp = newTemp();
-            code.append("  ").append(temp).append(" = call i32 @readInt()\n");
-            return temp;
-        }
-        return null;
+@Override
+public Object visitCallExpression(CallExpression ast, Object o) {
+    if (ast.I.spelling.equals("read")) {
+        String temp = newTemp();
+        code.append("  ").append(temp).append(" = call i32 @readInt()\n");
+        return temp;
     }
-
-
+    return null;
+}
 
 
 
@@ -176,9 +173,8 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitVnameExpression(VnameExpression ast, Object o) {
-        return ast.V.visit(this, o);  // esto permite que n dentro de print(n) funcione
+        return ast.V.visit(this, o);
     }
-
 
     @Override
     public Object visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, Object o) {
@@ -215,12 +211,13 @@ public class LLVMGenerator implements Visitor {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     @Override
-    public Object visitVarDeclaration(VarDeclaration decl, Object o) {
-        String varName = "@" + decl.I.spelling;
-        llvmNames.put(decl, varName);
+    public Object visitVarDeclaration(VarDeclaration ast, Object o) {
+        String varName = "@" + ast.I.spelling;
+        llvmNames.put(ast, varName);  //  esto es lo que vincula la declaración con su nombre LLVM
         code.insert(0, varName + " = global i32 0\n");
         return null;
     }
+
 
     @Override
     public Object visitMultipleArrayAggregate(MultipleArrayAggregate ast, Object o) {
@@ -279,7 +276,7 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitConstActualParameter(ConstActualParameter ast, Object o) {
-        return ast.E.visit(this, o);
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -309,7 +306,7 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitSingleActualParameterSequence(SingleActualParameterSequence ast, Object o) {
-        return ast.AP.visit(this, o);
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -382,27 +379,26 @@ public class LLVMGenerator implements Visitor {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
- 
-@Override
-public Object visitSimpleVname(SimpleVname ast, Object o) {
-    Declaration decl = (Declaration) ast.I.decl;  // <--- esta línea es la clave
-    System.out.println(">> visitSimpleVname: " + ast.I.spelling + ", decl=" + decl);
+    @Override
+    public Object visitSimpleVname(SimpleVname ast, Object o) {
+        // Usamos la declaración ligada durante el análisis contextual
+        if (ast.D instanceof VarDeclaration) {
+            String varName = llvmNames.get(ast.D);
 
-    if (decl instanceof VarDeclaration) {
-        String varName = llvmNames.get(decl);
-        if (varName == null) {
-            varName = "@" + ast.I.spelling;
+            if (varName == null) {
+                // Si no se ha asignado un nombre LLVM, usar el nombre textual como fallback
+                varName = "@" + ast.I.spelling;
+            }
+
+            String temp = newTemp();
+            code.append("  ").append(temp)
+                .append(" = load i32, ptr ").append(varName).append("\n");
+            return temp;
         }
-        String temp = newTemp();
-        code.append("  ").append(temp).append(" = load i32, ptr ").append(varName).append("\n");
-        return temp;
+
+        // Si no es una variable, no se puede generar código (para simplificar)
+        return null;
     }
-
-    return null;
-}
-
-
-
 
     @Override
     public Object visitSubscriptVname(SubscriptVname ast, Object o) {

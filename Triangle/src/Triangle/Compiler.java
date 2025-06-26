@@ -88,8 +88,6 @@ public class Compiler {
         if (reporter.numErrors == 0) {
             System.out.println("Contextual Analysis ...");
             checker.check(theAST);
-            System.out.println(">> Contextual analysis terminado");
-
             if (showingAST) {
                 drawer.draw(theAST);
             }

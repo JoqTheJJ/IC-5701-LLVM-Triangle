@@ -28,5 +28,4 @@ public class SimpleVname extends Vname {
   }
 
   public Identifier I;
-  public Declaration D;
 }
