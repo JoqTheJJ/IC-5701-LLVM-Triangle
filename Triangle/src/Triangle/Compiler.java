@@ -62,13 +62,11 @@ public class Compiler {
      * @return	true iff the source program is free of compile-time errors,
      *          otherwise false.
      */
-    static boolean compileProgram (String sourceName, String objectName,
-                                   boolean showingAST, boolean showingTable) {
+    static boolean compileProgram(String sourceName, String objectName,
+                                   boolean showingAST, boolean showingTable,
+                                   boolean useLLVM) {
 
-        System.out.println("********** " +
-                           "Triangle Compiler (Java Version 2.1)" +
-                           " Hola Mundo! " +
-                           " **********");
+        System.out.println("********** Triangle Compiler (Java Version 2.1) Hola Mundo! **********");
 
         System.out.println("Syntactic Analysis ...");
         SourceFile source = new SourceFile(sourceName);
@@ -85,56 +83,60 @@ public class Compiler {
         encoder  = new Encoder(reporter);
         drawer   = new Drawer();
 
-        // scanner.enableDebugging();
-        theAST = parser.parseProgram();				// 1st pass
+        theAST = parser.parseProgram();
+
         if (reporter.numErrors == 0) {
-            //if (showingAST) {
-            //    drawer.draw(theAST);
-            //}
-            System.out.println ("Contextual Analysis ...");
-            checker.check(theAST);				// 2nd pass
+            System.out.println("Contextual Analysis ...");
+            checker.check(theAST);
+            System.out.println(">> Contextual analysis terminado");
+
             if (showingAST) {
                 drawer.draw(theAST);
             }
+
             if (reporter.numErrors == 0) {
-                System.out.println("Code Generation ...");
-                encoder.encodeRun(theAST, showingTable);	// 3rd pass
-
-                // ⚙️ Generación LLVM
-                System.out.println("LLVM Code Generation ...");
-                LLVMGenerator llvmGen = new LLVMGenerator();
-                String llvmCode = llvmGen.generate(theAST);
-                System.out.println("===== CÓDIGO LLVM =====");
-                System.out.println(llvmCode);
+                if (useLLVM) {
+                    System.out.println("LLVM Code Generation ...");
+                    LLVMGenerator llvmGen = new LLVMGenerator();
+                    String llvmCode = llvmGen.generate(theAST);
+                    System.out.println("===== CÓDIGO LLVM =====");
+                    System.out.println(llvmCode);
+                } else {
+                    System.out.println("Code Generation ...");
+                    encoder.encodeRun(theAST, showingTable);
+                    encoder.saveObjectProgram(objectName);
+                }
             }
-
         }
 
-	boolean successful = (reporter.numErrors == 0);
+        boolean successful = (reporter.numErrors == 0);
         if (successful) {
-            encoder.saveObjectProgram(objectName);
             System.out.println("Compilation was successful.");
         } else {
             System.out.println("Compilation was unsuccessful.");
         }
+
         return successful;
     }
 
     /**
      * Triangle compiler main program.
-     *
-     * @param	args	the only command-line argument to the program specifies
-     *                  the source filename.
      */
     public static void main(String[] args) {
         boolean compiledOK;
+        boolean useLLVM = false;
 
-        if (args.length != 1) {
-            System.out.println("Usage: tc filename");
+        if (args.length < 1 || args.length > 2) {
+            System.out.println("Usage: tc filename [--llvm]");
             System.exit(1);
         }
 
         String sourceName = args[0];
-        compiledOK = compileProgram(sourceName, objectName, false, false);
+
+        if (args.length == 2 && args[1].equals("--llvm")) {
+            useLLVM = true;
+        }
+
+        compiledOK = compileProgram(sourceName, objectName, false, false, useLLVM);
     }
 }
