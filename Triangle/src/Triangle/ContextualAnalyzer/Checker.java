@@ -221,37 +221,30 @@ public final class Checker implements Visitor {
     return null;
   }
 
-public Object visitConstDeclaration(ConstDeclaration ast, Object o) {
-    ast.E = (Expression) ast.E.visit(this, null);
-    ast.I.decl = ast;                      //  TAM
+  public Object visitConstDeclaration(ConstDeclaration ast, Object o) {
+    TypeDenoter eType = (TypeDenoter) ast.E.visit(this, null);
     idTable.enter(ast.I.spelling, ast);
-    if (ast.duplicated) {
-        reporter.reportError("identifier \"%\" already declared",
-                             ast.I.spelling, ast.position);
-    }
-    return null;
-}
-
-
-public Object visitFuncDeclaration(FuncDeclaration ast, Object o) {
-    ast.T = (TypeDenoter) ast.T.visit(this, null);
-    ast.I.decl = ast; // TAM
-    idTable.enter(ast.I.spelling, ast); 
     if (ast.duplicated)
-        reporter.reportError("identifier \"%\" already declared",
-                             ast.I.spelling, ast.position);
+      reporter.reportError ("identifier \"%\" already declared",
+                            ast.I.spelling, ast.position);
+    return null;
+  }
 
+  public Object visitFuncDeclaration(FuncDeclaration ast, Object o) {
+    ast.T = (TypeDenoter) ast.T.visit(this, null);
+    idTable.enter (ast.I.spelling, ast); // permits recursion
+    if (ast.duplicated)
+      reporter.reportError ("identifier \"%\" already declared",
+                            ast.I.spelling, ast.position);
     idTable.openScope();
     ast.FPS.visit(this, null);
     TypeDenoter eType = (TypeDenoter) ast.E.visit(this, null);
     idTable.closeScope();
-
-    if (!ast.T.equals(eType))
-        reporter.reportError("body of function \"%\" has wrong type",
-                             ast.I.spelling, ast.E.position);
+    if (! ast.T.equals(eType))
+      reporter.reportError ("body of function \"%\" has wrong type",
+                            ast.I.spelling, ast.E.position);
     return null;
-}
-
+  }
 
   public Object visitProcDeclaration(ProcDeclaration ast, Object o) {
     idTable.enter (ast.I.spelling, ast); // permits recursion
@@ -284,18 +277,15 @@ public Object visitFuncDeclaration(FuncDeclaration ast, Object o) {
     return null;
   }
 
-
-public Object visitVarDeclaration(VarDeclaration ast, Object o) {
+  public Object visitVarDeclaration(VarDeclaration ast, Object o) {
     ast.T = (TypeDenoter) ast.T.visit(this, null);
-    ast.I.decl = ast;                      // TAM
-    idTable.enter(ast.I.spelling, ast);   // registra en tabla
-    if (ast.duplicated) {
-        reporter.reportError("identifier \"%\" already declared",
-                             ast.I.spelling, ast.position);
-    }
-    return null;
-}
+    idTable.enter (ast.I.spelling, ast);
+    if (ast.duplicated)
+      reporter.reportError ("identifier \"%\" already declared",
+                            ast.I.spelling, ast.position);
 
+    return null;
+  }
 
   // Array Aggregates
 
@@ -643,11 +633,14 @@ public Object visitVarDeclaration(VarDeclaration ast, Object o) {
 public Object visitSimpleVname(SimpleVname ast, Object o) {
     ast.variable = false;
     ast.type = StdEnvironment.errorType;
-    Declaration binding = (Declaration) ast.I.visit(this, null);
+
+    // ✅ Buscar en la tabla de símbolos
+    Declaration binding = idTable.retrieve(ast.I.spelling);
+
     if (binding == null) {
         reportUndeclared(ast.I);
     } else {
-        ast.D = binding;  //  LLVM
+        ast.D = binding;  // ✅ Guardar la declaración ligada en el AST
 
         if (binding instanceof ConstDeclaration) {
             ast.type = ((ConstDeclaration) binding).E.type;
@@ -662,13 +655,12 @@ public Object visitSimpleVname(SimpleVname ast, Object o) {
             ast.type = ((VarFormalParameter) binding).T;
             ast.variable = true;
         } else {
-            reporter.reportError("\"%\" is not a const or var identifier",
-                                 ast.I.spelling, ast.I.position);
+            reporter.reportError("\"%\" is not a const or var identifier", ast.I.spelling, ast.I.position);
         }
     }
+
     return ast.type;
 }
-
 
 
   public Object visitSubscriptVname(SubscriptVname ast, Object o) {
