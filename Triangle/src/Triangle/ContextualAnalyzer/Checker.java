@@ -629,39 +629,30 @@ public final class Checker implements Visitor {
     return ast.type;
   }
 
-@Override
-public Object visitSimpleVname(SimpleVname ast, Object o) {
+  public Object visitSimpleVname(SimpleVname ast, Object o) {
     ast.variable = false;
     ast.type = StdEnvironment.errorType;
-
-    // ✅ Buscar en la tabla de símbolos
-    Declaration binding = idTable.retrieve(ast.I.spelling);
-
-    if (binding == null) {
-        reportUndeclared(ast.I);
-    } else {
-        ast.D = binding;  // ✅ Guardar la declaración ligada en el AST
-
-        if (binding instanceof ConstDeclaration) {
-            ast.type = ((ConstDeclaration) binding).E.type;
-            ast.variable = false;
-        } else if (binding instanceof VarDeclaration) {
-            ast.type = ((VarDeclaration) binding).T;
-            ast.variable = true;
-        } else if (binding instanceof ConstFormalParameter) {
-            ast.type = ((ConstFormalParameter) binding).T;
-            ast.variable = false;
-        } else if (binding instanceof VarFormalParameter) {
-            ast.type = ((VarFormalParameter) binding).T;
-            ast.variable = true;
-        } else {
-            reporter.reportError("\"%\" is not a const or var identifier", ast.I.spelling, ast.I.position);
-        }
-    }
-
+    Declaration binding = (Declaration) ast.I.visit(this, null);
+    if (binding == null)
+      reportUndeclared(ast.I);
+    else
+      if (binding instanceof ConstDeclaration) {
+        ast.type = ((ConstDeclaration) binding).E.type;
+        ast.variable = false;
+      } else if (binding instanceof VarDeclaration) {
+        ast.type = ((VarDeclaration) binding).T;
+        ast.variable = true;
+      } else if (binding instanceof ConstFormalParameter) {
+        ast.type = ((ConstFormalParameter) binding).T;
+        ast.variable = false;
+      } else if (binding instanceof VarFormalParameter) {
+        ast.type = ((VarFormalParameter) binding).T;
+        ast.variable = true;
+      } else
+        reporter.reportError ("\"%\" is not a const or var identifier",
+                              ast.I.spelling, ast.I.position);
     return ast.type;
-}
-
+  }
 
   public Object visitSubscriptVname(SubscriptVname ast, Object o) {
     TypeDenoter vType = (TypeDenoter) ast.V.visit(this, null);
