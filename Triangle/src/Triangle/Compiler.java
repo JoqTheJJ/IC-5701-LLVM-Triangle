@@ -99,14 +99,33 @@ public class Compiler {
                     System.out.println("LLVM Code Generation ...");
                     LLVMGenerator llvmGen = new LLVMGenerator();
                     String llvmCode = llvmGen.generate(theAST);
+
                     System.out.println("===== CÓDIGO LLVM =====");
                     System.out.println(llvmCode);
+
+                    try {
+                        
+
+                        // Derivar nombre de archivo .ll a partir del .tri
+                        String outputFileName = sourceName.replaceAll("\\.tri$", ".ll");
+                        System.out.println("Archivo fuente: " + sourceName);
+                        System.out.println("Guardando archivo LLVM en: " + outputFileName);
+
+                        java.nio.file.Files.write(
+                            java.nio.file.Paths.get(outputFileName),
+                            llvmCode.getBytes()
+                        );
+
+                        System.out.println("Archivo " + outputFileName + " guardado exitosamente.");
+                    } catch (Exception e) {
+                        System.err.println("Error guardando archivo LLVM: " + e.getMessage());
+                    }
                 } else {
                     System.out.println("Code Generation ...");
                     encoder.encodeRun(theAST, showingTable);
                     encoder.saveObjectProgram(objectName);
                 }
-            }
+           }
         }
 
         boolean successful = (reporter.numErrors == 0);

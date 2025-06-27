@@ -20,6 +20,10 @@ public class LLVMGenerator implements Visitor {
     public String generate(Program program) {
         code.insert(0, "declare i32 @readInt()\n");
         code.insert(0, "declare void @printInt(i32)\n");
+        code.insert(0, "declare i8 @readChar()\n");
+        code.insert(0, "declare void @printChar(i8)\n");
+
+
         code.append("define i32 @main() {\n");
         program.visit(this, null);
         code.append("  ret i32 0\n");
@@ -71,19 +75,22 @@ public class LLVMGenerator implements Visitor {
         return null;
     }
 
-    @Override
     public Object visitCallCommand(CallCommand cmd, Object o) {
-        if (cmd.I.spelling.equals("print")) {
-            String value = (String) cmd.APS.visit(this, o);
-            code.append("  call void @printInt(i32 ").append(value).append(")\n");
-        }
-        return null;
+    String value = (String) cmd.APS.visit(this, o);
+
+    if (cmd.I.spelling.equals("print") || cmd.I.spelling.equals("putint")) {
+        code.append("  call void @printInt(i32 ").append(value).append(")\n");
+    } else if (cmd.I.spelling.equals("put")) {
+        String temp = newTemp();
+        code.append("  ").append(temp).append(" = trunc i32 ").append(value).append(" to i8\n");
+        code.append("  call void @printChar(i8 ").append(temp).append(")\n");
     }
 
+    return null;
+}
 
 
 
-    @Override
     public Object visitEmptyCommand(EmptyCommand ast, Object o) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
@@ -401,13 +408,37 @@ public Object visitSimpleVname(SimpleVname ast, Object o) {
     return null;
 }
 
-
-
-
     @Override
     public Object visitSubscriptVname(SubscriptVname ast, Object o) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
+
+    public Object visitGetCharCommand(GetCharCommand ast, Object o) {
+        // Obtener nombre LLVM de la variable de destino
+        if (ast.V instanceof SimpleVname) {
+            SimpleVname simple = (SimpleVname) ast.V;
+
+            if (simple.D instanceof VarDeclaration) {
+                String varName = llvmNames.get(simple.D);
+                if (varName == null) varName = "@" + simple.I.spelling;
+
+                // Llamar a readChar()
+                String temp = newTemp();
+                code.append("  ").append(temp).append(" = call i8 @readChar()\n");
+
+                // Extender a i32 si es necesario (para almacenarlo en int)
+                String extended = newTemp();
+                code.append("  ").append(extended).append(" = zext i8 ").append(temp).append(" to i32\n");
+
+                // Guardar en variable destino
+                code.append("  store i32 ").append(extended).append(", ptr ").append(varName).append("\n");
+            }
+        }
+
+        return null;
+    }
+
     
     
 }

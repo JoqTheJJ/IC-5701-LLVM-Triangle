@@ -1,0 +1,11 @@
+let
+  var letra : Integer
+in
+  begin
+    letra := ord('a');
+    while letra <= ord('z') do
+      begin
+        put(chr(letra));
+        letra := letra + 1
+      end
+  end
