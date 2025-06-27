@@ -170,12 +170,23 @@ public class FileFrame extends javax.swing.JInternalFrame {
         consolePane.setText("");
     }
     
+    /** 
+     * Clears the LLVM Console text box.
+     */
+    public void clearLLVMConsole() {
+        LLVMconsolePane.setText("");
+    }
+    
     /**
      * Writes in the Console text box.
      * @param text Text to be written.
      */
     public void writeToConsole(String text) {
         consolePane.setText(consolePane.getText() + text);
+    }
+    
+    public void writeToLLVMConsole(String text) {
+        LLVMconsolePane.setText(LLVMconsolePane.getText() + text);
     }
     
     /**
@@ -186,11 +197,22 @@ public class FileFrame extends javax.swing.JInternalFrame {
     }
     
     /**
+     * Clears the TAM Code text box.   
+     */
+    public void clearLLVMCode() {
+        LLVMPane.setText("");
+    }
+    
+    /**
      * Writes in the TAM Code text box.
      * @param text Text to be written.
      */
     public void writeToTAMCode(String text) {
         tamPane.setText(tamPane.getText() + text);
+    }
+    
+    public void writeToLLVMCode(String text) {
+        LLVMPane.setText(LLVMPane.getText() + text);
     }
       
     /**
@@ -198,6 +220,10 @@ public class FileFrame extends javax.swing.JInternalFrame {
      */
     public void selectConsole() {
         tabbedPane.setSelectedComponent(consolePanel);
+    }
+    
+    public void selectLLVMConsole() {
+        tabbedPane.setSelectedComponent(LLVMConsolePanel);
     }
     
     /**

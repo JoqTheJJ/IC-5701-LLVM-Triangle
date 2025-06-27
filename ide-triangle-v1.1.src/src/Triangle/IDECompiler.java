@@ -15,6 +15,7 @@ import Triangle.AbstractSyntaxTrees.Program;
 import Triangle.SyntacticAnalyzer.Parser;
 import Triangle.ContextualAnalyzer.Checker;
 import Triangle.CodeGenerator.Encoder;
+import Triangle.Compiler;
 
 
 
@@ -41,6 +42,16 @@ public class IDECompiler {
      * @param sourceName Path to the source file.
      * @return True if compilation was succesful.
      */
+    public boolean compileLLVMProgram(String sourceName) {
+        System.out.println("********** " +
+                           "Triangle LLVM Compiler (K1rb1 1.1)" +
+                           " **********");
+        
+        boolean success = true;//Compiler.compileProgram(sourceName, sourceName+".ll", false, false);
+        //boolean success = Compiler.compileProgram(sourceName, sourceName+".ll", false, false, true);
+        return success;
+    }
+    
     public boolean compileProgram(String sourceName) {
         System.out.println("********** " +
                            "Triangle Compiler (IDE-Triangle 1.0)" +
