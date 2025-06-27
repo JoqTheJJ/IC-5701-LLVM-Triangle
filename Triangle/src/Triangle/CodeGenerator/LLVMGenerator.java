@@ -5,6 +5,81 @@ import Triangle.SyntacticAnalyzer.SourcePosition;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+import Triangle.ErrorReporter;
+import Triangle.StdEnvironment;
+import Triangle.AbstractSyntaxTrees.AST;
+import Triangle.AbstractSyntaxTrees.AnyTypeDenoter;
+import Triangle.AbstractSyntaxTrees.ArrayExpression;
+import Triangle.AbstractSyntaxTrees.ArrayTypeDenoter;
+import Triangle.AbstractSyntaxTrees.AssignCommand;
+import Triangle.AbstractSyntaxTrees.BinaryExpression;
+import Triangle.AbstractSyntaxTrees.BinaryOperatorDeclaration;
+import Triangle.AbstractSyntaxTrees.BoolTypeDenoter;
+import Triangle.AbstractSyntaxTrees.CallCommand;
+import Triangle.AbstractSyntaxTrees.CallExpression;
+import Triangle.AbstractSyntaxTrees.CharTypeDenoter;
+import Triangle.AbstractSyntaxTrees.CharacterExpression;
+import Triangle.AbstractSyntaxTrees.CharacterLiteral;
+import Triangle.AbstractSyntaxTrees.ConstActualParameter;
+import Triangle.AbstractSyntaxTrees.ConstDeclaration;
+import Triangle.AbstractSyntaxTrees.ConstFormalParameter;
+import Triangle.AbstractSyntaxTrees.Declaration;
+import Triangle.AbstractSyntaxTrees.DotVname;
+import Triangle.AbstractSyntaxTrees.EmptyActualParameterSequence;
+import Triangle.AbstractSyntaxTrees.EmptyCommand;
+import Triangle.AbstractSyntaxTrees.EmptyExpression;
+import Triangle.AbstractSyntaxTrees.EmptyFormalParameterSequence;
+import Triangle.AbstractSyntaxTrees.ErrorTypeDenoter;
+import Triangle.AbstractSyntaxTrees.FuncActualParameter;
+import Triangle.AbstractSyntaxTrees.FuncDeclaration;
+import Triangle.AbstractSyntaxTrees.FuncFormalParameter;
+import Triangle.AbstractSyntaxTrees.Identifier;
+import Triangle.AbstractSyntaxTrees.IfCommand;
+import Triangle.AbstractSyntaxTrees.IfExpression;
+import Triangle.AbstractSyntaxTrees.IntTypeDenoter;
+import Triangle.AbstractSyntaxTrees.IntegerExpression;
+import Triangle.AbstractSyntaxTrees.IntegerLiteral;
+import Triangle.AbstractSyntaxTrees.LetCommand;
+import Triangle.AbstractSyntaxTrees.LetExpression;
+import Triangle.AbstractSyntaxTrees.MultipleActualParameterSequence;
+import Triangle.AbstractSyntaxTrees.MultipleArrayAggregate;
+import Triangle.AbstractSyntaxTrees.MultipleFieldTypeDenoter;
+import Triangle.AbstractSyntaxTrees.MultipleFormalParameterSequence;
+import Triangle.AbstractSyntaxTrees.MultipleRecordAggregate;
+import Triangle.AbstractSyntaxTrees.Operator;
+import Triangle.AbstractSyntaxTrees.ProcActualParameter;
+import Triangle.AbstractSyntaxTrees.ProcDeclaration;
+import Triangle.AbstractSyntaxTrees.ProcFormalParameter;
+import Triangle.AbstractSyntaxTrees.Program;
+import Triangle.AbstractSyntaxTrees.RecordExpression;
+import Triangle.AbstractSyntaxTrees.RecordTypeDenoter;
+import Triangle.AbstractSyntaxTrees.SequentialCommand;
+import Triangle.AbstractSyntaxTrees.SequentialDeclaration;
+import Triangle.AbstractSyntaxTrees.SimpleTypeDenoter;
+import Triangle.AbstractSyntaxTrees.SimpleVname;
+import Triangle.AbstractSyntaxTrees.SingleActualParameterSequence;
+import Triangle.AbstractSyntaxTrees.SingleArrayAggregate;
+import Triangle.AbstractSyntaxTrees.SingleFieldTypeDenoter;
+import Triangle.AbstractSyntaxTrees.SingleFormalParameterSequence;
+import Triangle.AbstractSyntaxTrees.SingleRecordAggregate;
+import Triangle.AbstractSyntaxTrees.SubscriptVname;
+import Triangle.AbstractSyntaxTrees.TypeDeclaration;
+import Triangle.AbstractSyntaxTrees.UnaryExpression;
+import Triangle.AbstractSyntaxTrees.UnaryOperatorDeclaration;
+import Triangle.AbstractSyntaxTrees.VarActualParameter;
+import Triangle.AbstractSyntaxTrees.VarDeclaration;
+import Triangle.AbstractSyntaxTrees.VarFormalParameter;
+import Triangle.AbstractSyntaxTrees.Visitor;
+import Triangle.AbstractSyntaxTrees.Vname;
+import Triangle.AbstractSyntaxTrees.VnameExpression;
+import Triangle.AbstractSyntaxTrees.WhileCommand;
 public class LLVMGenerator implements Visitor {
 
     private StringBuilder code;
@@ -56,7 +131,6 @@ public class LLVMGenerator implements Visitor {
     }
 
 
-    @Override
     public Object visitAssignCommand(AssignCommand ac, Object o) {
         String val = (String) ac.E.visit(this, o);
 
@@ -92,18 +166,18 @@ public class LLVMGenerator implements Visitor {
 
 
     public Object visitEmptyCommand(EmptyCommand ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return null;
     }
 
     @Override
     public Object visitIfCommand(IfCommand ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+      throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public Object visitLetCommand(LetCommand lc, Object o) {
         // Declaraciones: asumimos variables globales por ahora
-        lc.D.visit(this, o); // visita la declaración
+        lc.D.visit(this, o); // visita la declaFración
 
         // Comando dentro del 'in'
         lc.C.visit(this, o); // visita el cuerpo del let
@@ -118,8 +192,36 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitWhileCommand(WhileCommand ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String loopLabel = "loop" + tempCount++;
+        String bodyLabel = "body" + tempCount++;
+        String endLabel = "end" + tempCount++;
+
+        // Salto al comienzo del loop
+        code.append("  br label %").append(loopLabel).append("\n");
+
+        // Label de la condición
+        code.append(loopLabel).append(":\n");
+
+        // Evaluar condición del while
+        String condValue = (String) ast.E.visit(this, o);
+        String condBool = newTemp();
+        code.append("  ").append(condBool).append(" = icmp ne i32 ").append(condValue).append(", 0\n");
+        code.append("  br i1 ").append(condBool)
+            .append(", label %").append(bodyLabel)
+            .append(", label %").append(endLabel).append("\n");
+
+        // Cuerpo del while
+        code.append(bodyLabel).append(":\n");
+        ast.C.visit(this, o);
+        code.append("  br label %").append(loopLabel).append("\n");
+
+        // Fin del bucle
+        code.append(endLabel).append(":\n");
+
+        return null;
     }
+
+
 
     @Override
     public Object visitArrayExpression(ArrayExpression ast, Object o) {
@@ -147,7 +249,13 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitCharacterExpression(CharacterExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // Obtener el literal de carácter, por ejemplo: 'a'
+    char c = ast.CL.spelling.charAt(1);  // char literal como 'a'
+    int ascii = (int) c;
+
+    String temp = newTemp();
+    code.append("  ").append(temp).append(" = add i32 ").append(ascii).append(", 0\n");
+    return temp;
     }
 
     @Override

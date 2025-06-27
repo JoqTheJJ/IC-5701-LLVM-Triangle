@@ -1,0 +1,7 @@
+let
+  var n : Char
+in
+  begin
+    n := 'a';
+    put(n)
+  end
