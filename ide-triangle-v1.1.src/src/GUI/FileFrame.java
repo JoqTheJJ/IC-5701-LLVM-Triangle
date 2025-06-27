@@ -286,8 +286,9 @@ public class FileFrame extends javax.swing.JInternalFrame {
     }
     // </editor-fold>
                  
-    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+
         tabbedPane = new javax.swing.JTabbedPane();
         sourcePanel = new javax.swing.JPanel();
         sourceScroll = new javax.swing.JScrollPane();
@@ -303,19 +304,29 @@ public class FileFrame extends javax.swing.JInternalFrame {
         tamScroll = new javax.swing.JScrollPane();
         tamPane = new javax.swing.JEditorPane();
         tableScroll = new javax.swing.JScrollPane();
+        LLVMCodePane = new javax.swing.JScrollPane();
+        LLVMPane = new javax.swing.JEditorPane();
+        LLVMConsolePanel = new javax.swing.JPanel();
+        LLVMconsoleScroll = new javax.swing.JScrollPane();
+        LLVMconsolePane = new javax.swing.JEditorPane();
+        LLVMinputPanel = new javax.swing.JPanel();
+        inputFieldLLVM = new javax.swing.JTextField();
+        enterButtonLLVM = new javax.swing.JButton();
 
         setClosable(true);
         setIconifiable(true);
         setMaximizable(true);
         setResizable(true);
         setDoubleBuffered(true);
-        setFrameIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icons/iconFrame.gif")));
+        setFrameIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icons/iconFrame.gif"))); // NOI18N
+
         sourcePanel.setLayout(new javax.swing.BoxLayout(sourcePanel, javax.swing.BoxLayout.Y_AXIS));
 
         sourceScroll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         sourceScroll.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        sourceScroll.setName("sourceScroll");
-        sourcePane.setFont(new java.awt.Font("Courier New", 0, 12));
+        sourceScroll.setName("sourceScroll"); // NOI18N
+
+        sourcePane.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         sourceScroll.setViewportView(sourcePane);
 
         sourcePanel.add(sourceScroll);
@@ -328,20 +339,21 @@ public class FileFrame extends javax.swing.JInternalFrame {
 
         tabbedPane.addTab("Source Code", sourcePanel);
 
+        consolePanel.setName("consolePanel"); // NOI18N
         consolePanel.setLayout(new javax.swing.BoxLayout(consolePanel, javax.swing.BoxLayout.Y_AXIS));
 
-        consolePanel.setName("consolePanel");
         consoleScroll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         consoleScroll.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
         consolePane.setEditable(false);
-        consolePane.setFont(new java.awt.Font("Courier New", 0, 12));
+        consolePane.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         consoleScroll.setViewportView(consolePane);
 
         consolePanel.add(consoleScroll);
 
-        inputPanel.setLayout(new javax.swing.BoxLayout(inputPanel, javax.swing.BoxLayout.X_AXIS));
-
         inputPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        inputPanel.setLayout(new javax.swing.BoxLayout(inputPanel, javax.swing.BoxLayout.LINE_AXIS));
+
         inputField.setEnabled(false);
         inputField.setMaximumSize(new java.awt.Dimension(2147483647, 20));
         inputField.setMinimumSize(new java.awt.Dimension(11, 20));
@@ -361,16 +373,50 @@ public class FileFrame extends javax.swing.JInternalFrame {
 
         tamScroll.setBorder(null);
         tamScroll.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        tamScroll.setName("tamScroll");
+        tamScroll.setName("tamScroll"); // NOI18N
+
         tamPane.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         tamPane.setEditable(false);
-        tamPane.setFont(new java.awt.Font("Courier New", 0, 12));
+        tamPane.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         tamScroll.setViewportView(tamPane);
 
         tabbedPane.addTab("TAM Code", tamScroll);
 
         tableScroll.setBorder(null);
         tabbedPane.addTab("Table Details", tableScroll);
+
+        LLVMCodePane.setViewportView(LLVMPane);
+
+        tabbedPane.addTab("LLVM Code", LLVMCodePane);
+
+        LLVMConsolePanel.setName("consolePanel"); // NOI18N
+        LLVMConsolePanel.setLayout(new javax.swing.BoxLayout(LLVMConsolePanel, javax.swing.BoxLayout.Y_AXIS));
+
+        LLVMconsoleScroll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        LLVMconsoleScroll.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        LLVMconsolePane.setEditable(false);
+        LLVMconsolePane.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
+        LLVMconsoleScroll.setViewportView(LLVMconsolePane);
+
+        LLVMConsolePanel.add(LLVMconsoleScroll);
+
+        LLVMinputPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        LLVMinputPanel.setLayout(new javax.swing.BoxLayout(LLVMinputPanel, javax.swing.BoxLayout.LINE_AXIS));
+
+        inputFieldLLVM.setEnabled(false);
+        inputFieldLLVM.setMaximumSize(new java.awt.Dimension(2147483647, 20));
+        inputFieldLLVM.setMinimumSize(new java.awt.Dimension(11, 20));
+        inputFieldLLVM.setPreferredSize(new java.awt.Dimension(23, 20));
+        LLVMinputPanel.add(inputFieldLLVM);
+
+        enterButtonLLVM.setText("Enter Input");
+        enterButtonLLVM.setEnabled(false);
+        LLVMinputPanel.add(enterButtonLLVM);
+
+        LLVMConsolePanel.add(LLVMinputPanel);
+
+        tabbedPane.addTab("LLVM Console", LLVMConsolePanel);
 
         getContentPane().add(tabbedPane, java.awt.BorderLayout.CENTER);
 
@@ -379,12 +425,20 @@ public class FileFrame extends javax.swing.JInternalFrame {
       
     // <editor-fold defaultstate="collapsed" desc=" GUI Variables ">
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane LLVMCodePane;
+    private javax.swing.JPanel LLVMConsolePanel;
+    private javax.swing.JEditorPane LLVMPane;
+    private javax.swing.JEditorPane LLVMconsolePane;
+    private javax.swing.JScrollPane LLVMconsoleScroll;
+    private javax.swing.JPanel LLVMinputPanel;
     private javax.swing.JScrollPane astScroll;
     private javax.swing.JEditorPane consolePane;
     private javax.swing.JPanel consolePanel;
     private javax.swing.JScrollPane consoleScroll;
     private javax.swing.JButton enterButton;
+    private javax.swing.JButton enterButtonLLVM;
     private javax.swing.JTextField inputField;
+    private javax.swing.JTextField inputFieldLLVM;
     private javax.swing.JPanel inputPanel;
     private javax.swing.JTextPane rowPane;
     private javax.swing.JEditorPane sourcePane;
