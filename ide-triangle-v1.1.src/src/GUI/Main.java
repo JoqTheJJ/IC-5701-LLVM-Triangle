@@ -177,6 +177,9 @@ public class Main extends javax.swing.JFrame {
         triangleToolBar = new javax.swing.JToolBar();
         buttonCompile = new javax.swing.JButton();
         buttonRun = new javax.swing.JButton();
+        LLVMToolBar = new javax.swing.JToolBar();
+        LLVMbuttonCompile = new javax.swing.JButton();
+        LLVMbuttonRun = new javax.swing.JButton();
         desktopPane = new javax.swing.JDesktopPane();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
@@ -338,6 +341,40 @@ public class Main extends javax.swing.JFrame {
         triangleToolBar.add(buttonRun);
 
         toolBarsPanel.add(triangleToolBar);
+
+        LLVMToolBar.setFocusable(false);
+        LLVMToolBar.setName("Triangle"); // NOI18N
+        LLVMToolBar.setRequestFocusEnabled(false);
+
+        LLVMbuttonCompile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icons/iconEvilCompile.gif"))); // NOI18N
+        LLVMbuttonCompile.setToolTipText("Compile...");
+        LLVMbuttonCompile.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        LLVMbuttonCompile.setBorderPainted(false);
+        LLVMbuttonCompile.setEnabled(false);
+        LLVMbuttonCompile.setFocusPainted(false);
+        LLVMbuttonCompile.setFocusable(false);
+        LLVMbuttonCompile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LLVMbuttonCompilecompileMenuItemActionPerformed(evt);
+            }
+        });
+        LLVMToolBar.add(LLVMbuttonCompile);
+
+        LLVMbuttonRun.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icons/iconEvilRun.gif"))); // NOI18N
+        LLVMbuttonRun.setToolTipText("Run...");
+        LLVMbuttonRun.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        LLVMbuttonRun.setBorderPainted(false);
+        LLVMbuttonRun.setEnabled(false);
+        LLVMbuttonRun.setFocusPainted(false);
+        LLVMbuttonRun.setFocusable(false);
+        LLVMbuttonRun.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LLVMbuttonRunrunMenuItemActionPerformed(evt);
+            }
+        });
+        LLVMToolBar.add(LLVMbuttonRun);
+
+        toolBarsPanel.add(LLVMToolBar);
 
         getContentPane().add(toolBarsPanel, java.awt.BorderLayout.NORTH);
 
@@ -677,6 +714,14 @@ public class Main extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
+    private void LLVMbuttonCompilecompileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LLVMbuttonCompilecompileMenuItemActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_LLVMbuttonCompilecompileMenuItemActionPerformed
+
+    private void LLVMbuttonRunrunMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LLVMbuttonRunrunMenuItemActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_LLVMbuttonRunrunMenuItemActionPerformed
+
     // </editor-fold>    
            
     // <editor-fold defaultstate="collapsed" desc=" Delegates and Listeners ">    
@@ -806,6 +851,9 @@ public class Main extends javax.swing.JFrame {
     
     // <editor-fold defaultstate="collapsed" desc=" GUI Variables ">
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    javax.swing.JToolBar LLVMToolBar;
+    javax.swing.JButton LLVMbuttonCompile;
+    javax.swing.JButton LLVMbuttonRun;
     javax.swing.JMenuItem aboutMenuItem;
     javax.swing.JButton buttonCompile;
     javax.swing.JButton buttonCopy;
