@@ -28,7 +28,7 @@ import Triangle.Compiler;
  */
 public class IDECompiler {
 
-    // <editor-fold defaultstate="collapsed" desc=" Methods ">
+
     /**
      * Creates a new instance of IDECompiler.
      *
@@ -47,8 +47,7 @@ public class IDECompiler {
                            "Triangle LLVM Compiler (K1rb1 1.1)" +
                            " **********");
         
-        boolean success = true;//Compiler.compileProgram(sourceName, sourceName+".ll", false, false);
-        //boolean success = Compiler.compileProgram(sourceName, sourceName+".ll", false, false, true);
+        boolean success = Compiler.compileProgram(sourceName, sourceName+".ll", false, false, true);
         return success;
     }
     
@@ -104,7 +103,6 @@ public class IDECompiler {
     public Program getAST() {
         return(rootAST);
     }
-    // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc=" Attributes ">
     private Program rootAST;        // The Root Abstract Syntax Tree.    
