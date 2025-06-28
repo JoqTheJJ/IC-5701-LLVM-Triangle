@@ -1,0 +1,8 @@
+let
+  var c : Integer
+in
+  begin
+    getint(c);
+    put(c)
+  end
+

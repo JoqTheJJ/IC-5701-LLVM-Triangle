@@ -91,6 +91,9 @@ import Triangle.AbstractSyntaxTrees.Visitor;
 import Triangle.AbstractSyntaxTrees.Vname;
 import Triangle.AbstractSyntaxTrees.VnameExpression;
 import Triangle.AbstractSyntaxTrees.WhileCommand;
+//GetChar Command
+import Triangle.AbstractSyntaxTrees.GetCharCommand;
+import Triangle.AbstractSyntaxTrees.GetIntCommand;
 
 public final class Encoder implements Visitor {
 
@@ -160,6 +163,23 @@ public final class Encoder implements Visitor {
     return null;
   }
   
+    //GetCharCommands
+  public Object visitGetCharCommand(GetCharCommand ast, Object o) {
+    Frame frame = (Frame) o;
+    encodeFetchAddress(ast.V, frame);
+    emit(Machine.CALLop, Machine.SBr, Machine.PBr, Machine.getDisplacement);
+    return null;
+}
+  
+    public Object visitGetIntCommand(GetIntCommand ast, Object o) {
+      Frame frame = (Frame) o;
+      encodeFetchAddress(ast.V, frame); 
+      emit(Machine.CALLop, Machine.SBr, Machine.PBr, Machine.getintDisplacement); // ✅ Llamar a getint
+      return null;
+    }
+
+
+
   // Expressions
   public Object visitArrayExpression(ArrayExpression ast, Object o) {
     ast.type.visit(this, null);

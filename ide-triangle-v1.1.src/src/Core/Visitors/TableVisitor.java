@@ -78,6 +78,10 @@ import Triangle.CodeGenerator.UnknownRoutine;
 import Triangle.CodeGenerator.UnknownValue;
 import javax.swing.table.DefaultTableModel;
 
+//GetCharCommand
+import Triangle.AbstractSyntaxTrees.GetCharCommand;
+import Triangle.AbstractSyntaxTrees.GetIntCommand;
+
 /**
  * Implements the Triangle Visitor interface, which is used to
  * visit an entire AST. 
@@ -140,6 +144,18 @@ public class TableVisitor implements Visitor {
       
       return(null);
   }
+  
+    //GetCharCommand
+    public Object visitGetCharCommand(GetCharCommand ast, Object o){
+      ast.V.visit(this, null);
+      return null;
+  }
+    
+  public Object visitGetIntCommand(GetIntCommand ast, Object o) {
+      ast.V.visit(this, null); 
+      return null;
+   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc=" Expressions ">

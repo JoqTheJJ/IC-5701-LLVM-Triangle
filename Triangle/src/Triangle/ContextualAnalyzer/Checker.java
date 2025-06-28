@@ -94,6 +94,31 @@ public Object visitCallCommand(CallCommand ast, Object o) {
     return null;
   }
   
+    //GetCharCommand
+  public Object visitGetCharCommand(GetCharCommand ast, Object o) {
+    TypeDenoter varType = (TypeDenoter) ast.V.visit(this, null);
+    if (!ast.V.variable)
+        reporter.reportError("Expected a variable", "", ast.V.position);
+    if (!(varType instanceof CharTypeDenoter))
+        reporter.reportError("Expected variable of type Char", "", ast.V.position);
+    return null;
+  }
+  
+
+public Object visitGetIntCommand(GetIntCommand ast, Object o) {
+  TypeDenoter vType = (TypeDenoter) ast.V.visit(this, null);
+
+  if (!vType.equals(StdEnvironment.integerType))
+    reporter.reportError("Integer variable expected", "", ast.position);
+
+  if (!ast.V.variable)
+    reporter.reportError("actual parameter is not a variable", "", ast.position);
+
+  return null;
+}
+
+
+  
   // Expressions
 
   // Returns the TypeDenoter denoting the type of the expression. Does

@@ -37,6 +37,8 @@ import Core.ExampleFileFilter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import Core.Visitors.TreeVisitor;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
@@ -93,6 +95,10 @@ public class Main extends javax.swing.JFrame {
             buttonPaste.setEnabled(false);            
             buttonCompile.setEnabled(false);
             buttonRun.setEnabled(false);
+            LLVMbuttonCompile.setEnabled(false);
+            LLVMbuttonRun.setEnabled(false);
+            LLVMcompileMenuItem.setEnabled(false);
+            LLVMrunMenuItem.setEnabled(false);
             cutMenuItem.setEnabled(false);
             copyMenuItem.setEnabled(false);
             pasteMenuItem.setEnabled(false);            
@@ -130,6 +136,9 @@ public class Main extends javax.swing.JFrame {
         pasteMenuItem.setEnabled(true);
         compileMenuItem.setEnabled(true);
         buttonCompile.setEnabled(true);
+        
+        LLVMcompileMenuItem.setEnabled(true);
+        LLVMbuttonCompile.setEnabled(true);
        
         checkSaveChanges();        
         return(x);
@@ -177,6 +186,9 @@ public class Main extends javax.swing.JFrame {
         triangleToolBar = new javax.swing.JToolBar();
         buttonCompile = new javax.swing.JButton();
         buttonRun = new javax.swing.JButton();
+        LLVMToolBar = new javax.swing.JToolBar();
+        LLVMbuttonCompile = new javax.swing.JButton();
+        LLVMbuttonRun = new javax.swing.JButton();
         desktopPane = new javax.swing.JDesktopPane();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
@@ -193,6 +205,8 @@ public class Main extends javax.swing.JFrame {
         triangleMenu = new javax.swing.JMenu();
         compileMenuItem = new javax.swing.JMenuItem();
         runMenuItem = new javax.swing.JMenuItem();
+        LLVMcompileMenuItem = new javax.swing.JMenuItem();
+        LLVMrunMenuItem = new javax.swing.JMenuItem();
         helpMenu = new javax.swing.JMenu();
         aboutMenuItem = new javax.swing.JMenuItem();
 
@@ -339,6 +353,40 @@ public class Main extends javax.swing.JFrame {
 
         toolBarsPanel.add(triangleToolBar);
 
+        LLVMToolBar.setFocusable(false);
+        LLVMToolBar.setName("Triangle"); // NOI18N
+        LLVMToolBar.setRequestFocusEnabled(false);
+
+        LLVMbuttonCompile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icons/iconEvilCompile.gif"))); // NOI18N
+        LLVMbuttonCompile.setToolTipText("Compile...");
+        LLVMbuttonCompile.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        LLVMbuttonCompile.setBorderPainted(false);
+        LLVMbuttonCompile.setEnabled(false);
+        LLVMbuttonCompile.setFocusPainted(false);
+        LLVMbuttonCompile.setFocusable(false);
+        LLVMbuttonCompile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LLVMbuttonCompilecompileMenuItemActionPerformed(evt);
+            }
+        });
+        LLVMToolBar.add(LLVMbuttonCompile);
+
+        LLVMbuttonRun.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icons/iconEvilRun.gif"))); // NOI18N
+        LLVMbuttonRun.setToolTipText("Run...");
+        LLVMbuttonRun.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        LLVMbuttonRun.setBorderPainted(false);
+        LLVMbuttonRun.setEnabled(false);
+        LLVMbuttonRun.setFocusPainted(false);
+        LLVMbuttonRun.setFocusable(false);
+        LLVMbuttonRun.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LLVMbuttonRunrunMenuItemActionPerformed(evt);
+            }
+        });
+        LLVMToolBar.add(LLVMbuttonRun);
+
+        toolBarsPanel.add(LLVMToolBar);
+
         getContentPane().add(toolBarsPanel, java.awt.BorderLayout.NORTH);
 
         desktopPane.setBackground(new java.awt.Color(0, 103, 201));
@@ -475,6 +523,28 @@ public class Main extends javax.swing.JFrame {
             }
         });
         triangleMenu.add(runMenuItem);
+
+        LLVMcompileMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icons/iconEvilCompile.gif"))); // NOI18N
+        LLVMcompileMenuItem.setMnemonic('C');
+        LLVMcompileMenuItem.setText("Compile LLVM");
+        LLVMcompileMenuItem.setEnabled(false);
+        LLVMcompileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LLVMbuttonCompilecompileMenuItemActionPerformed(evt);
+            }
+        });
+        triangleMenu.add(LLVMcompileMenuItem);
+
+        LLVMrunMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icons/iconEvilRun.gif"))); // NOI18N
+        LLVMrunMenuItem.setMnemonic('R');
+        LLVMrunMenuItem.setText("Run LLVM");
+        LLVMrunMenuItem.setEnabled(false);
+        LLVMrunMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LLVMbuttonRunrunMenuItemActionPerformed(evt);
+            }
+        });
+        triangleMenu.add(LLVMrunMenuItem);
 
         menuBar.add(triangleMenu);
 
@@ -677,6 +747,86 @@ public class Main extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
+    
+    /**
+     * Handles the "LLVM" menu options.
+     */
+    private void LLVMbuttonCompilecompileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LLVMbuttonCompilecompileMenuItemActionPerformed
+        if ((!((FileFrame)desktopPane.getSelectedFrame()).getPreviouslySaved()) || ((FileFrame)desktopPane.getSelectedFrame()).hasChanged()) {
+            saveMenuItemActionPerformed(null);
+        }
+        
+        if (((FileFrame)desktopPane.getSelectedFrame()).getPreviouslySaved()) {
+            ((FileFrame)desktopPane.getSelectedFrame()).selectLLVMConsole();
+            ((FileFrame)desktopPane.getSelectedFrame()).clearLLVMConsole();
+            ((FileFrame)desktopPane.getSelectedFrame()).clearLLVMCode();
+            new File(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll")).delete();
+            
+            output.setDelegate(delegateLLVMConsole);            
+            if (compiler.compileLLVMProgram(desktopPane.getSelectedFrame().getTitle())) {           
+                output.setDelegate(delegateLLVMCode);
+                LLVMDisassembler(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
+                // TREE  <<< ((FileFrame)desktopPane.getSelectedFrame()).setTree((DefaultMutableTreeNode)treeVisitor.visitProgram(compiler.getAST(), null));
+                // TABLE <<< ((FileFrame)desktopPane.getSelectedFrame()).setTable(tableVisitor.getTable(compiler.getAST()));
+                
+                LLVMrunMenuItem.setEnabled(true);
+                LLVMbuttonRun.setEnabled(true);
+            } else {
+                ((FileFrame)desktopPane.getSelectedFrame()).highlightError(compiler.getErrorPosition());
+                LLVMrunMenuItem.setEnabled(false);
+                LLVMbuttonRun.setEnabled(false);
+            }
+        }
+    }//GEN-LAST:event_LLVMbuttonCompilecompileMenuItemActionPerformed
+
+    private void LLVMDisassembler(String name){
+        try (BufferedReader reader = new BufferedReader(new FileReader(name))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+        }
+    }
+    
+    private void LLVMbuttonRunrunMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LLVMbuttonRunrunMenuItemActionPerformed
+        ((FileFrame)desktopPane.getSelectedFrame()).clearLLVMConsole();
+        ((FileFrame)desktopPane.getSelectedFrame()).selectLLVMConsole();
+        output.setDelegate(delegateLLVMConsole);
+        LLVMrunMenuItem.setEnabled(false);
+        LLVMbuttonRun.setEnabled(false);
+        LLVMcompileMenuItem.setEnabled(false);
+        LLVMbuttonCompile.setEnabled(false);
+        
+        //#############
+        /**           #
+         *     /\     #
+         *    /  \    #
+         *   / 00 \   #
+         *   \    /   #
+         *    \  /    #
+         *     \/     #
+        */             
+        //#############
+        
+        
+        FileFrame frame = (FileFrame) desktopPane.getSelectedFrame();
+        String fileName = frame.getTitle();
+        
+        if (directory != null && fileName.endsWith(".tri")) {
+            //String triFilePath = new File(directory, fileName).getAbsolutePath();
+            //System.out.println(triFilePath);
+            System.out.println(fileName);
+            compileAndRunLLVMPipeline(fileName);
+        } else {
+            System.out.println("El archivo debe estar guardado como .tri.\n");
+        }
+        
+        //old
+        //LLVMinterpreter.Run(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
+    }//GEN-LAST:event_LLVMbuttonRunrunMenuItemActionPerformed
+
     // </editor-fold>    
            
     // <editor-fold defaultstate="collapsed" desc=" Delegates and Listeners ">    
@@ -750,6 +900,90 @@ public class Main extends javax.swing.JFrame {
         public void internalFrameOpened(InternalFrameEvent evt) { }
     };
     
+
+    /**
+     * LLVM - Console
+     */
+    ActionListener delegateLLVMConsole = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            while (output.peekQueue())
+                ((FileFrame)desktopPane.getSelectedFrame()).writeToLLVMConsole(output.readQueue());
+        }
+    };
+
+    ActionListener delegateLLVMCode = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            while (output.peekQueue())
+                ((FileFrame)desktopPane.getSelectedFrame()).writeToLLVMCode(output.readQueue());
+        }        
+    };
+    
+    ActionListener delegateLLVMRun = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            LLVMrunMenuItem.setEnabled(true);
+            LLVMbuttonRun.setEnabled(true);
+            LLVMcompileMenuItem.setEnabled(true);
+            LLVMbuttonCompile.setEnabled(true);
+        }
+    };
+    
+
+    
+    
+    
+    
+    private void runCommand(String title, String... command) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+
+        //writeToLLVMConsole("\n?? " + title);
+        System.out.println(title);
+        System.out.println("Command: " + String.join(" ", command));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            //writeToLLVMConsole(line + "\n");
+            System.out.println(line + "\n");
+        }
+
+        int exitCode = process.waitFor();
+        //writeToLLVMConsole("?? Código de salida: " + exitCode + "\n");
+        System.out.println("Código de salida: " + exitCode + "\n");
+    }
+    
+    public void compileAndRunLLVMPipeline(String triFilePath) {
+        new Thread(() -> {
+            try {
+                String fileBase = triFilePath.replaceFirst("[.][^.]+$", "");
+                String llFile = fileBase + ".ll";
+                String exeFile = fileBase + ".exe";
+                
+                String ioFile = new File("runtime/io.ll").getAbsolutePath();
+
+                // TODO
+                //setInputEnabled(false); // Desactiva el input mientras corre
+
+                // Compilar a LLVM
+                //runCommand("Compilando a LLVM...\n", "java", "-cp", "build/classes", "Triangle.Compiler", triFilePath, "--llvm");
+
+                // Linkear con io.ll
+                runCommand("Linkeando con io.ll...\n", "clang", llFile, ioFile, "-o", exeFile);
+
+                // Ejecutar el binario
+                runCommand("Ejecutando el programa:\n", exeFile);
+
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage() + "\n");
+            } finally {
+                
+                // TODO
+                //setInputEnabled(true); // Reactiva input al final
+            }
+        }).start();
+    }
+    
     
     /**
      * Used to redirect the console output - writes in the "Console" panel.     
@@ -806,6 +1040,11 @@ public class Main extends javax.swing.JFrame {
     
     // <editor-fold defaultstate="collapsed" desc=" GUI Variables ">
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    javax.swing.JToolBar LLVMToolBar;
+    javax.swing.JButton LLVMbuttonCompile;
+    javax.swing.JButton LLVMbuttonRun;
+    javax.swing.JMenuItem LLVMcompileMenuItem;
+    javax.swing.JMenuItem LLVMrunMenuItem;
     javax.swing.JMenuItem aboutMenuItem;
     javax.swing.JButton buttonCompile;
     javax.swing.JButton buttonCopy;
@@ -846,6 +1085,7 @@ public class Main extends javax.swing.JFrame {
     IDECompiler compiler = new IDECompiler();                               // Compiler - Analyzes/generates TAM programs
     IDEDisassembler disassembler = new IDEDisassembler();                   // Disassembler - Generates TAM Code
     IDEInterpreter interpreter = new IDEInterpreter(delegateRun);           // Interpreter - Runs TAM programs
+    IDEInterpreter LLVMinterpreter = new IDEInterpreter(delegateLLVMRun);   // Runs LLVM
     OutputRedirector output = new OutputRedirector();                       // Redirects the console output
     InputRedirector input = new InputRedirector(delegateInput);             // Redirects console input
     TreeVisitor treeVisitor = new TreeVisitor();                            // Draws the Abstract Syntax Trees

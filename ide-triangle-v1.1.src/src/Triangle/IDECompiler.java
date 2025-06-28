@@ -15,6 +15,7 @@ import Triangle.AbstractSyntaxTrees.Program;
 import Triangle.SyntacticAnalyzer.Parser;
 import Triangle.ContextualAnalyzer.Checker;
 import Triangle.CodeGenerator.Encoder;
+import Triangle.Compiler;
 
 
 
@@ -27,7 +28,7 @@ import Triangle.CodeGenerator.Encoder;
  */
 public class IDECompiler {
 
-    // <editor-fold defaultstate="collapsed" desc=" Methods ">
+
     /**
      * Creates a new instance of IDECompiler.
      *
@@ -41,6 +42,15 @@ public class IDECompiler {
      * @param sourceName Path to the source file.
      * @return True if compilation was succesful.
      */
+    public boolean compileLLVMProgram(String sourceName) {
+        System.out.println("********** " +
+                           "Triangle LLVM Compiler (K1rb1 1.1)" +
+                           " **********");
+        
+        boolean success = Compiler.compileProgram(sourceName, sourceName+".ll", false, false, true);
+        return success;
+    }
+    
     public boolean compileProgram(String sourceName) {
         System.out.println("********** " +
                            "Triangle Compiler (IDE-Triangle 1.0)" +
@@ -93,7 +103,6 @@ public class IDECompiler {
     public Program getAST() {
         return(rootAST);
     }
-    // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc=" Attributes ">
     private Program rootAST;        // The Root Abstract Syntax Tree.    

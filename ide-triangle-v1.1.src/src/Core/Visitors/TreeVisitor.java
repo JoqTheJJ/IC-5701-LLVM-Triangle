@@ -70,6 +70,10 @@ import Triangle.AbstractSyntaxTrees.VnameExpression;
 import Triangle.AbstractSyntaxTrees.WhileCommand;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+//GetCharCommand
+import Triangle.AbstractSyntaxTrees.GetCharCommand;
+import Triangle.AbstractSyntaxTrees.GetIntCommand;
+
 /**
  * Implements the Triangle Visitor interface, which is used to
  * visit an entire AST. 
@@ -115,6 +119,16 @@ public class TreeVisitor implements Visitor {
     public Object visitWhileCommand(WhileCommand ast, Object obj) {
         return(createBinary("While Command", ast.E, ast.C));
     }
+    
+    //GetChar
+    public Object visitGetCharCommand(GetCharCommand ast, Object o) {
+       return createUnary("Get Char Command", ast.V);
+    }
+    
+    public Object visitGetIntCommand(GetIntCommand ast, Object o) {
+        return createUnary("Get Int Command", ast.V); 
+    }
+
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc=" Expressions ">
