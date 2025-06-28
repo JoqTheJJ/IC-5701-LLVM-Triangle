@@ -1,0 +1,8 @@
+let
+  var c : Char
+in
+  begin
+    getchar(c);
+    put(c)
+  end
+
