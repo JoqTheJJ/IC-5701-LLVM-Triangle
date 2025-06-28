@@ -8,6 +8,9 @@ import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -311,6 +314,10 @@ public class FileFrame extends javax.swing.JInternalFrame {
         tableScroll.setViewportView(idTable);
     }
     // </editor-fold>
+    
+    
+
+    
                  
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

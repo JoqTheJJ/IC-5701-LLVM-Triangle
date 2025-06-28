@@ -38,6 +38,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import Core.Visitors.TreeVisitor;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
@@ -798,17 +799,32 @@ public class Main extends javax.swing.JFrame {
         LLVMcompileMenuItem.setEnabled(false);
         LLVMbuttonCompile.setEnabled(false);
         
-        //TODO Interpreter LLVM
-        /**
-         *   /\   
-         *  /  \  
-         * / 00 \ 
-         * \    / 
-         *  \  /  
-         *   \/   
-        */
-        //TODO Interpreter LLVM
-        LLVMinterpreter.Run(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
+        //#############
+        /**           #
+         *     /\     #
+         *    /  \    #
+         *   / 00 \   #
+         *   \    /   #
+         *    \  /    #
+         *     \/     #
+        */             
+        //#############
+        
+        
+        FileFrame frame = (FileFrame) desktopPane.getSelectedFrame();
+        String fileName = frame.getTitle();
+        
+        if (directory != null && fileName.endsWith(".tri")) {
+            //String triFilePath = new File(directory, fileName).getAbsolutePath();
+            //System.out.println(triFilePath);
+            System.out.println(fileName);
+            compileAndRunLLVMPipeline(fileName);
+        } else {
+            System.out.println("El archivo debe estar guardado como .tri.\n");
+        }
+        
+        //old
+        //LLVMinterpreter.Run(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
     }//GEN-LAST:event_LLVMbuttonRunrunMenuItemActionPerformed
 
     // </editor-fold>    
@@ -904,14 +920,70 @@ public class Main extends javax.swing.JFrame {
     
     ActionListener delegateLLVMRun = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            //runMenuItem.setEnabled(true);
+            LLVMrunMenuItem.setEnabled(true);
             LLVMbuttonRun.setEnabled(true);
-            //compileMenuItem.setEnabled(true);
+            LLVMcompileMenuItem.setEnabled(true);
             LLVMbuttonCompile.setEnabled(true);
         }
     };
     
 
+    
+    
+    
+    
+    private void runCommand(String title, String... command) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+
+        //writeToLLVMConsole("\n?? " + title);
+        System.out.println(title);
+        System.out.println("Command: " + String.join(" ", command));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            //writeToLLVMConsole(line + "\n");
+            System.out.println(line + "\n");
+        }
+
+        int exitCode = process.waitFor();
+        //writeToLLVMConsole("?? Código de salida: " + exitCode + "\n");
+        System.out.println("Código de salida: " + exitCode + "\n");
+    }
+    
+    public void compileAndRunLLVMPipeline(String triFilePath) {
+        new Thread(() -> {
+            try {
+                String fileBase = triFilePath.replaceFirst("[.][^.]+$", "");
+                String llFile = fileBase + ".ll";
+                String exeFile = fileBase + ".exe";
+                
+                String ioFile = new File("runtime/io.ll").getAbsolutePath();
+
+                // TODO
+                //setInputEnabled(false); // Desactiva el input mientras corre
+
+                // Compilar a LLVM
+                //runCommand("Compilando a LLVM...\n", "java", "-cp", "build/classes", "Triangle.Compiler", triFilePath, "--llvm");
+
+                // Linkear con io.ll
+                runCommand("Linkeando con io.ll...\n", "clang", llFile, ioFile, "-o", exeFile);
+
+                // Ejecutar el binario
+                runCommand("Ejecutando el programa:\n", exeFile);
+
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage() + "\n");
+            } finally {
+                
+                // TODO
+                //setInputEnabled(true); // Reactiva input al final
+            }
+        }).start();
+    }
+    
     
     /**
      * Used to redirect the console output - writes in the "Console" panel.     

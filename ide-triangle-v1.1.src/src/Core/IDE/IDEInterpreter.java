@@ -37,6 +37,34 @@ public class IDEInterpreter {
     }      
     // </editor-fold>
     
+    public synchronized void RunLLVM(final String fileName) {
+        new Thread(() -> {/**
+            try {
+                String fileBase = triFilePath.replaceFirst("[.][^.]+$", ""); // test.tri ? test
+                String llFile = fileBase + ".ll";
+                String exeFile = fileBase + ".exe";
+
+                setInputEnabled(false); // Desactiva el input mientras corre
+
+                // Compilar a LLVM
+                runCommand("Compilando a LLVM...\n", "java", "-cp", "build/classes", "Triangle.Compiler", triFilePath, "--llvm");
+
+                // Linkear con io.ll
+                runCommand("Linkeando con io.ll...\n", "clang", llFile, "io.ll", "-o", exeFile);
+
+                // Ejecutar el binario
+                runCommand("Ejecutando el programa:\n", exeFile);
+
+            } catch (Exception e) {
+                writeToLLVMConsole("?? Error: " + e.getMessage() + "\n");
+            } finally {
+                setInputEnabled(true);
+            }*/
+        }).start();
+    }
+    
+    
+    
     // <editor-fold defaultstate="collapsed" desc=" Attributes ">
     private ActionListener delegate;    // Gets triggered when the Interpreter stops.
     // </editor-fold>
