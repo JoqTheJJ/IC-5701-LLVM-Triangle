@@ -93,6 +93,7 @@ public class LLVMGenerator implements Visitor {
     }
 
     public String generate(Program program) {
+        code.insert(0, "@true = global i32 1\n@false = global i32 0\n");
         code.insert(0, "declare i32 @readInt()\n");
         code.insert(0, "declare void @printInt(i32)\n");
         code.insert(0, "declare i8 @readChar()\n");
@@ -169,10 +170,36 @@ public class LLVMGenerator implements Visitor {
         return null;
     }
 
-    @Override
     public Object visitIfCommand(IfCommand ast, Object o) {
-      throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String thenLabel = "then" + tempCount++;
+        String elseLabel = "else" + tempCount++;
+        String endLabel  = "endif" + tempCount++;
+
+        // Evaluar la condición
+        String condValue = (String) ast.E.visit(this, o);
+        String condBool = newTemp();
+        code.append("  ").append(condBool)
+            .append(" = icmp ne i32 ").append(condValue).append(", 0\n");
+        code.append("  br i1 ").append(condBool)
+            .append(", label %").append(thenLabel)
+            .append(", label %").append(elseLabel).append("\n");
+
+        // Bloque THEN
+        code.append(thenLabel).append(":\n");
+        ast.C1.visit(this, o);
+        code.append("  br label %").append(endLabel).append("\n");
+
+        // Bloque ELSE
+        code.append(elseLabel).append(":\n");
+        ast.C2.visit(this, o);
+        code.append("  br label %").append(endLabel).append("\n");
+
+        // Fin del IF
+        code.append(endLabel).append(":\n");
+
+        return null;
     }
+
 
     @Override
     public Object visitLetCommand(LetCommand lc, Object o) {
@@ -190,23 +217,19 @@ public class LLVMGenerator implements Visitor {
         return null;
     }
 
-    @Override
+    
     public Object visitWhileCommand(WhileCommand ast, Object o) {
         String loopLabel = "loop" + tempCount++;
         String bodyLabel = "body" + tempCount++;
         String endLabel = "end" + tempCount++;
 
-        // Salto al comienzo del loop
+        // Ir al bloque de condición
         code.append("  br label %").append(loopLabel).append("\n");
 
-        // Label de la condición
+        // Condición del while
         code.append(loopLabel).append(":\n");
-
-        // Evaluar condición del while
-        String condValue = (String) ast.E.visit(this, o);
-        String condBool = newTemp();
-        code.append("  ").append(condBool).append(" = icmp ne i32 ").append(condValue).append(", 0\n");
-        code.append("  br i1 ").append(condBool)
+        String condValue = (String) ast.E.visit(this, o);  // debe retornar i1
+        code.append("  br i1 ").append(condValue)
             .append(", label %").append(bodyLabel)
             .append(", label %").append(endLabel).append("\n");
 
@@ -215,7 +238,7 @@ public class LLVMGenerator implements Visitor {
         ast.C.visit(this, o);
         code.append("  br label %").append(loopLabel).append("\n");
 
-        // Fin del bucle
+        // Fin
         code.append(endLabel).append(":\n");
 
         return null;
@@ -230,8 +253,58 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitBinaryExpression(BinaryExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String left = (String) ast.E1.visit(this, o);
+        String right = (String) ast.E2.visit(this, o);
+        String temp = newTemp();
+        String op = ast.O.spelling;
+
+        switch (op) {
+            case "+":
+                code.append("  ").append(temp).append(" = add i32 ").append(left).append(", ").append(right).append("\n");
+                break;
+            case "-":
+                code.append("  ").append(temp).append(" = sub i32 ").append(left).append(", ").append(right).append("\n");
+                break;
+            case "*":
+                code.append("  ").append(temp).append(" = mul i32 ").append(left).append(", ").append(right).append("\n");
+                break;
+            case "/":
+                code.append("  ").append(temp).append(" = sdiv i32 ").append(left).append(", ").append(right).append("\n");
+                break;
+            case "<":
+                code.append("  ").append(temp).append(" = icmp slt i32 ").append(left).append(", ").append(right).append("\n");
+                break;
+
+            case "<=":
+                code.append("  ").append(temp).append(" = icmp sle i32 ").append(left).append(", ").append(right).append("\n");
+                return castBoolToInt(temp);
+            case "==":
+                code.append("  ").append(temp).append(" = icmp eq i32 ").append(left).append(", ").append(right).append("\n");
+                return castBoolToInt(temp);
+            case "!=":
+                code.append("  ").append(temp).append(" = icmp ne i32 ").append(left).append(", ").append(right).append("\n");
+                return castBoolToInt(temp);
+            case ">=":
+                code.append("  ").append(temp).append(" = icmp sge i32 ").append(left).append(", ").append(right).append("\n");
+                return castBoolToInt(temp);
+            case ">":
+                code.append("  ").append(temp).append(" = icmp sgt i32 ").append(left).append(", ").append(right).append("\n");
+                return castBoolToInt(temp);
+            default:
+                throw new UnsupportedOperationException("Operador no soportado: " + op);
+        }
+
+        return temp;
     }
+
+        
+    private String castBoolToInt(String boolVar) {
+        String intVar = newTemp();
+        code.append("  ").append(intVar).append(" = zext i1 ").append(boolVar).append(" to i32\n");
+        return intVar;
+    }
+
+
 
     @Override
     public Object visitCallExpression(CallExpression expr, Object o) {
@@ -260,7 +333,7 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitEmptyExpression(EmptyExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return "0";
     }
 
     @Override
@@ -274,9 +347,9 @@ public class LLVMGenerator implements Visitor {
     }
 
 
-    @Override
-    public Object visitLetExpression(LetExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Object visitLetExpression(LetExpression ast, Object o) {     
+        ast.D.visit(this, "let");
+        return ast.E.visit(this, o);
     }
 
     @Override
@@ -300,10 +373,40 @@ public class LLVMGenerator implements Visitor {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    
     @Override
     public Object visitConstDeclaration(ConstDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        String constName = "@" + ast.I.spelling;
+        String value = (String) ast.E.visit(this, o);
+
+        // Asumimos que el valor retornado puede ser un temporario como %t3
+        // Queremos declarar la constante directamente con un literal
+
+        // Si el valor es un literal directo como "1", úsalo. Si es temp (%t3), ignóralo.
+        String literal;
+        if (value.matches("\\d+")) {
+            literal = value;
+        } else {
+            // Fallback a 0 si no podemos extraer valor literal
+            literal = "0";
+        }
+
+    code.insert(0, constName + " = global i32 " + literal + "\n");
+    llvmNames.put(ast, constName);
+    return null;
+}
+
+
+    private String extractIntValue(String temp) {
+        // Si es un literal inmediato como '1' o '0', lo dejamos.
+        if (temp.matches("\\d+")) {
+            return temp;
+        }
+        // Si es un temporario, esto es más complejo.
+        // Asumimos que solo usamos esta función cuando el valor es literal.
+        return "0"; // fallback para evitar errores
     }
+
 
     @Override
     public Object visitFuncDeclaration(FuncDeclaration ast, Object o) {
@@ -331,6 +434,7 @@ public class LLVMGenerator implements Visitor {
     }
     @Override
     public Object visitVarDeclaration(VarDeclaration decl, Object o) {
+        String suffix = (o instanceof String) ? "." + o : "";
         String varName = "@" + decl.I.spelling;
         llvmNames.put(decl, varName);
         code.insert(0, varName + " = global i32 0\n");
@@ -437,14 +541,13 @@ public class LLVMGenerator implements Visitor {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
+   
     public Object visitBoolTypeDenoter(BoolTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+       return "i1";
     }
 
-    @Override
     public Object visitCharTypeDenoter(CharTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return "i8";
     }
 
     @Override
@@ -492,7 +595,7 @@ public class LLVMGenerator implements Visitor {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
-    @Override
+    
     public Object visitDotVname(DotVname ast, Object o) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
@@ -503,7 +606,7 @@ public Object visitSimpleVname(SimpleVname ast, Object o) {
     Declaration decl = (Declaration) ast.I.decl;  // <--- esta línea es la clave
     System.out.println(">> visitSimpleVname: " + ast.I.spelling + ", decl=" + decl);
 
-    if (decl instanceof VarDeclaration) {
+    if (decl instanceof VarDeclaration || decl instanceof ConstDeclaration) {
         String varName = llvmNames.get(decl);
         if (varName == null) {
             varName = "@" + ast.I.spelling;
@@ -512,6 +615,7 @@ public Object visitSimpleVname(SimpleVname ast, Object o) {
         code.append("  ").append(temp).append(" = load i32, ptr ").append(varName).append("\n");
         return temp;
     }
+
 
     return null;
 }

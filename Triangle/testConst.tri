@@ -1,0 +1,8 @@
+let
+  const diez = 10 ~
+  var x : Integer
+in
+  begin
+    x := diez;
+    putint(x)
+  end
