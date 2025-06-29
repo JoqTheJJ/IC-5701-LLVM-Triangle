@@ -651,10 +651,26 @@ public Object visitSimpleVname(SimpleVname ast, Object o) {
         return null;
     }
 
-    @Override
-    public Object visitGetIntCommand(GetIntCommand ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        public Object visitGetIntCommand(GetIntCommand ast, Object o) {
+        if (ast.V instanceof SimpleVname) {
+            SimpleVname simple = (SimpleVname) ast.V;
+
+            if (simple.D instanceof VarDeclaration) {
+                String varName = llvmNames.get(simple.D);
+                if (varName == null) varName = "@" + simple.I.spelling;
+
+                // Llamar a readInt()
+                String temp = newTemp();
+                code.append("  ").append(temp).append(" = call i32 @readInt()\n");
+
+                // Guardar en variable destino
+                code.append("  store i32 ").append(temp).append(", ptr ").append(varName).append("\n");
+            }
+        }
+
+        return null;
     }
+
 
     
     
