@@ -44,7 +44,7 @@ public class IDECompiler {
      */
     public boolean compileLLVMProgram(String sourceName) {
         System.out.println("********** " +
-                           "Triangle LLVM Compiler (K1rb1 1.1)" +
+                           "Triangle LLVM Compiler (K1rb1 1.5)" +
                            " **********");
         
         boolean success = Compiler.compileProgram(sourceName, sourceName+".ll", false, false, true);
