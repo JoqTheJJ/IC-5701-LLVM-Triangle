@@ -37,12 +37,13 @@ public class FileFrame extends javax.swing.JInternalFrame {
      * @param delegateFrame Event to fire when the frame is closed or focused.
      * @param delegateEnter Event to fire when the "Enter Input" button is pressed.
      */
-    public FileFrame(KeyAdapter delegateKey, MouseListener delegateMouse, InternalFrameListener delegateFrame, ActionListener delegateEnter) {
+    public FileFrame(KeyAdapter delegateKey, MouseListener delegateMouse, InternalFrameListener delegateFrame, ActionListener delegateEnter, ActionListener delegateLLVMEnter) {
         initComponents();
         previouslySaved = false;        
         sourcePane.addKeyListener(delegateKey);
         addInternalFrameListener(delegateFrame);
         enterButton.addActionListener(delegateEnter);
+        enterButtonLLVM.addActionListener(delegateLLVMEnter);
         sourcePane.addMouseListener(delegateMouse);
         previouslyModified = false;        
     }
@@ -142,6 +143,11 @@ public class FileFrame extends javax.swing.JInternalFrame {
         inputField.setEnabled(enabled);
         enterButton.setEnabled(enabled);
     }
+    
+    public void setLLVMInputEnabled(boolean enabled) {
+        inputFieldLLVM.setEnabled(enabled);
+        enterButtonLLVM.setEnabled(enabled);
+    }
           
     /**
      * Pastes text into the editor text box.
@@ -236,12 +242,18 @@ public class FileFrame extends javax.swing.JInternalFrame {
     public String getInputFieldText() {
         return(inputField.getText());
     }
+    public String getInputFieldTextLLVM() {
+        return(inputFieldLLVM.getText());
+    }
     
     /** 
      * Clears the text in the input field.
      */
     public void clearInputField() {
         inputField.setText("");
+    }
+    public void clearInputFieldLLVM() {
+        enterButtonLLVM.setText("");
     }
     
     /**
