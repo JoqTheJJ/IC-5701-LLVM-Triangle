@@ -104,6 +104,21 @@ public Object visitCallCommand(CallCommand ast, Object o) {
     return null;
   }
   
+
+public Object visitGetIntCommand(GetIntCommand ast, Object o) {
+  TypeDenoter vType = (TypeDenoter) ast.V.visit(this, null);
+
+  if (!vType.equals(StdEnvironment.integerType))
+    reporter.reportError("Integer variable expected", "", ast.position);
+
+  if (!ast.V.variable)
+    reporter.reportError("actual parameter is not a variable", "", ast.position);
+
+  return null;
+}
+
+
+  
   // Expressions
 
   // Returns the TypeDenoter denoting the type of the expression. Does

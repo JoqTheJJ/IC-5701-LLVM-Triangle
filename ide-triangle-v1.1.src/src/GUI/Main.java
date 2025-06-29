@@ -117,7 +117,7 @@ public class Main extends javax.swing.JFrame {
      * @return The new file frame.
      */
     private FileFrame addInternalFrame(String title, String contents) {
-        FileFrame x = new FileFrame(delegateSaveButton, delegateMouse, delegateInternalFrame, delegateEnter);
+        FileFrame x = new FileFrame(delegateSaveButton, delegateMouse, delegateInternalFrame, delegateEnter, delegateEnterLLVM);
         
         x.setTitle(title);
         x.setSize(540, 250);
@@ -769,10 +769,31 @@ public class Main extends javax.swing.JFrame {
                 // TREE  <<< ((FileFrame)desktopPane.getSelectedFrame()).setTree((DefaultMutableTreeNode)treeVisitor.visitProgram(compiler.getAST(), null));
                 // TABLE <<< ((FileFrame)desktopPane.getSelectedFrame()).setTable(tableVisitor.getTable(compiler.getAST()));
                 
+                System.out.println(" ___          ___");
+                System.out.println("(   \\________/   )");
+                System.out.println(" \\    _     _    /");
+                System.out.println(" /   |O|   |O|   \\");
+                System.out.println("|    |_|   |_|    |");
+                System.out.println("|  \"           \"  |");
+                System.out.println("|        O        |");
+                System.out.println(" \\                /");
+                System.out.println("  \\______________/");
+                System.out.println(" (___)      (___)");
+                
                 LLVMrunMenuItem.setEnabled(true);
                 LLVMbuttonRun.setEnabled(true);
             } else {
-                ((FileFrame)desktopPane.getSelectedFrame()).highlightError(compiler.getErrorPosition());
+                //((FileFrame)desktopPane.getSelectedFrame()).highlightError(compiler.getErrorPosition());
+                System.out.println("");
+                System.out.println("    _____________");
+                System.out.println("   /             \\ ");
+                System.out.println("  /    \\/   \\/    \\ ");
+                System.out.println(" |     /\\   /\\     |");
+                System.out.println(" |  \"           \"  |");
+                System.out.println(" |   U    .    U   |");
+                System.out.println(" _\\               /_");
+                System.out.println("(__\\_____________/__)");
+                
                 LLVMrunMenuItem.setEnabled(false);
                 LLVMbuttonRun.setEnabled(false);
             }
@@ -818,7 +839,8 @@ public class Main extends javax.swing.JFrame {
             //String triFilePath = new File(directory, fileName).getAbsolutePath();
             //System.out.println(triFilePath);
             System.out.println(fileName);
-            compileAndRunLLVMPipeline(fileName);
+            
+            LLVMinterpreter.RunLLVM(fileName);
         } else {
             System.out.println("El archivo debe estar guardado como .tri.\n");
         }
@@ -932,57 +954,7 @@ public class Main extends javax.swing.JFrame {
     
     
     
-    private void runCommand(String title, String... command) throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.redirectErrorStream(true);
-        Process process = pb.start();
-
-        //writeToLLVMConsole("\n?? " + title);
-        System.out.println(title);
-        System.out.println("Command: " + String.join(" ", command));
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            //writeToLLVMConsole(line + "\n");
-            System.out.println(line + "\n");
-        }
-
-        int exitCode = process.waitFor();
-        //writeToLLVMConsole("?? Código de salida: " + exitCode + "\n");
-        System.out.println("Código de salida: " + exitCode + "\n");
-    }
     
-    public void compileAndRunLLVMPipeline(String triFilePath) {
-        new Thread(() -> {
-            try {
-                String fileBase = triFilePath.replaceFirst("[.][^.]+$", "");
-                String llFile = fileBase + ".ll";
-                String exeFile = fileBase + ".exe";
-                
-                String ioFile = new File("runtime/io.ll").getAbsolutePath();
-
-                // TODO
-                //setInputEnabled(false); // Desactiva el input mientras corre
-
-                // Compilar a LLVM
-                //runCommand("Compilando a LLVM...\n", "java", "-cp", "build/classes", "Triangle.Compiler", triFilePath, "--llvm");
-
-                // Linkear con io.ll
-                runCommand("Linkeando con io.ll...\n", "clang", llFile, ioFile, "-o", exeFile);
-
-                // Ejecutar el binario
-                runCommand("Ejecutando el programa:\n", exeFile);
-
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage() + "\n");
-            } finally {
-                
-                // TODO
-                //setInputEnabled(true); // Reactiva input al final
-            }
-        }).start();
-    }
     
     
     /**
@@ -1013,6 +985,12 @@ public class Main extends javax.swing.JFrame {
             ((FileFrame)desktopPane.getSelectedFrame()).setInputEnabled(true);
         }
     };
+    ActionListener delegateInputLLVM = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            ((FileFrame)desktopPane.getSelectedFrame()).setInputEnabled(true);
+        }
+    };
+    
     
     /**
      * Used to redirect the console input - writes the user input in the console.
@@ -1021,6 +999,13 @@ public class Main extends javax.swing.JFrame {
         public void actionPerformed(ActionEvent e) {
             ((FileFrame)desktopPane.getSelectedFrame()).setInputEnabled(false);
             input.addInput(((FileFrame)desktopPane.getSelectedFrame()).getInputFieldText() + "\n");
+            ((FileFrame)desktopPane.getSelectedFrame()).clearInputField();
+        }
+    };
+    ActionListener delegateEnterLLVM = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            ((FileFrame)desktopPane.getSelectedFrame()).setInputEnabled(false);
+            inputLLVM.addInput(((FileFrame)desktopPane.getSelectedFrame()).getInputFieldText() + "\n");
             ((FileFrame)desktopPane.getSelectedFrame()).clearInputField();
         }
     };
@@ -1085,9 +1070,10 @@ public class Main extends javax.swing.JFrame {
     IDECompiler compiler = new IDECompiler();                               // Compiler - Analyzes/generates TAM programs
     IDEDisassembler disassembler = new IDEDisassembler();                   // Disassembler - Generates TAM Code
     IDEInterpreter interpreter = new IDEInterpreter(delegateRun);           // Interpreter - Runs TAM programs
-    IDEInterpreter LLVMinterpreter = new IDEInterpreter(delegateLLVMRun);   // Runs LLVM
+    IDEInterpreter LLVMinterpreter = new IDEInterpreter(delegateLLVMRun);   // Runs LLVM (REMOVED)
     OutputRedirector output = new OutputRedirector();                       // Redirects the console output
     InputRedirector input = new InputRedirector(delegateInput);             // Redirects console input
+    InputRedirector inputLLVM = new InputRedirector(delegateInputLLVM);     // Redirects the LLVM console input
     TreeVisitor treeVisitor = new TreeVisitor();                            // Draws the Abstract Syntax Trees
     TableVisitor tableVisitor = new TableVisitor();                         // Draws the Identifier Table
     File directory;                                                         // The current directory.

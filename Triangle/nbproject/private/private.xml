@@ -3,9 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/User/Desktop/GitHub-TEC/IC-5701-LLVM-Triangle/Triangle/src/Triangle/Compiler.java</file>
-            <file>file:/C:/Users/User/Desktop/GitHub-TEC/IC-5701-LLVM-Triangle/Triangle/src/Triangle/CodeGenerator/LLVMGenerator.java</file>
-            <file>file:/C:/Users/User/Desktop/GitHub-TEC/IC-5701-LLVM-Triangle/Triangle/src/Triangle/AbstractSyntaxTrees/VarDeclaration.java</file>
+            <file>file:/C:/Users/PC/Documents/GitHub/IC-5701-LLVM-Triangle/Triangle/src/TAM/Interpreter.java</file>
+            <file>file:/C:/Users/PC/Documents/GitHub/IC-5701-LLVM-Triangle/Triangle/src/Triangle/CodeGenerator/LLVMGenerator.java</file>
+            <file>file:/C:/Users/PC/Documents/GitHub/IC-5701-LLVM-Triangle/Triangle/src/Triangle/SyntacticAnalyzer/Parser.java</file>
         </group>
     </open-files>
 </project-private>

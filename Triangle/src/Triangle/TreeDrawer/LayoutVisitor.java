@@ -83,6 +83,7 @@ import Triangle.AbstractSyntaxTrees.WhileCommand;
 
 //GetCharCommand
 import Triangle.AbstractSyntaxTrees.GetCharCommand;
+import Triangle.AbstractSyntaxTrees.GetIntCommand;
 
 public class LayoutVisitor implements Visitor {
 
@@ -168,12 +169,16 @@ public class LayoutVisitor implements Visitor {
   public Object visitVnameExpression(VnameExpression ast, Object obj) {
     return layoutUnary("VnameExpr.", ast.V);
   }
-  
     //GetCharCommand
   public Object visitGetCharCommand(GetCharCommand ast, Object obj) {
     return layoutUnary("GetChar.", ast.V);
   } 
-
+  
+  public Object visitGetIntCommand(GetIntCommand ast, Object o) {
+   return layoutUnary("GetInt", ast.V);
+ 
+  }
+  
   // Declarations
   public Object visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, Object obj) {
     return layoutQuaternary("Bin.Op.Decl.", ast.O, ast.ARG1, ast.ARG2, ast.RES);

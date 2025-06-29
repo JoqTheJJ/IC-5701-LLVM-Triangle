@@ -27,7 +27,7 @@ public interface Visitor {
 
   // GetCharCommand
   public abstract Object visitGetCharCommand(GetCharCommand ast, Object o);
-  
+  public abstract Object visitGetIntCommand(GetIntCommand ast, Object o);
   // Expressions
   public abstract Object visitArrayExpression(ArrayExpression ast, Object o);
   public abstract Object visitBinaryExpression(BinaryExpression ast, Object o);

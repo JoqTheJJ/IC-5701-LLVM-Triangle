@@ -285,6 +285,21 @@ public class Parser {
       commandAST = new GetCharCommand(vAST, commandPos);
       }
       break;
+      
+    case Token.GETINT:
+      {
+        acceptIt();
+        accept(Token.LPAREN);
+        if (currentToken.kind == Token.VAR) {
+          accept(Token.VAR);
+        }
+        Vname vAST = parseVname();
+        accept(Token.RPAREN);
+        finish(commandPos);
+        commandAST = new GetIntCommand(vAST, commandPos);
+      }
+      break;
+
 
     case Token.SEMICOLON:
     case Token.END:
