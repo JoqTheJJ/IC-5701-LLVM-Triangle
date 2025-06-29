@@ -3,6 +3,8 @@ declare void @printChar(i8)
 declare i8 @readChar()
 declare void @printInt(i32)
 declare i32 @readInt()
+@true = global i32 1
+@false = global i32 0
 define i32 @main() {
   %t0 = add i32 42, 0
   store i32 %t0, ptr @n

@@ -568,7 +568,7 @@ public class Main extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    // <editor-fold defaultstate="collapsed" desc=" Event Handlers Implementation ">
+    //
     
     /**
      * Handles the "Run TAM Program" button and menu option.
@@ -840,7 +840,11 @@ public class Main extends javax.swing.JFrame {
             //System.out.println(triFilePath);
             System.out.println(fileName);
             
-            LLVMinterpreter.RunLLVM(fileName);
+            //Interprete
+            //LLVMinterpreter.RunLLVM(fileName);
+            
+            //Abre consola
+            openConsole();
         } else {
             System.out.println("El archivo debe estar guardado como .tri.\n");
         }
@@ -849,7 +853,17 @@ public class Main extends javax.swing.JFrame {
         //LLVMinterpreter.Run(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
     }//GEN-LAST:event_LLVMbuttonRunrunMenuItemActionPerformed
 
-    // </editor-fold>    
+    public static void openConsole() {
+        try {
+            ProcessBuilder builder = new ProcessBuilder("powershell.exe", "-NoExit", "-Command", "echo Hola desde PowerShell");
+            builder.inheritIO();
+            builder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    //    
            
     // <editor-fold defaultstate="collapsed" desc=" Delegates and Listeners ">    
     /**
@@ -1063,7 +1077,7 @@ public class Main extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
     // </editor-fold>
     
-    // <editor-fold defaultstate="collapsed" desc=" Non-GUI Variables ">
+    //
     // [ Non-GUI variables declaration ]
     int untitledCount = 1;                                                  // Counts "Untitled" document names (e.g. "Untitled-1")
     clipBoard Clip = new clipBoard();                                       // Clipboard Management
@@ -1078,7 +1092,7 @@ public class Main extends javax.swing.JFrame {
     TableVisitor tableVisitor = new TableVisitor();                         // Draws the Identifier Table
     File directory;                                                         // The current directory.
     // [ End of Non-GUI variables declaration ]
-    // </editor-fold>    
+    //  
     
     // <editor-fold defaultstate="collapsed" desc=" Internal Class - ClipboardOwner ">
     /**
