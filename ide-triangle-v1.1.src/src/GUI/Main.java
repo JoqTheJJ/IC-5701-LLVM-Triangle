@@ -756,12 +756,15 @@ public class Main extends javax.swing.JFrame {
             saveMenuItemActionPerformed(null);
         }
         
-        if (((FileFrame)desktopPane.getSelectedFrame()).getPreviouslySaved()) {
+        boolean loadToDisk = (JOptionPane.showConfirmDialog(this, desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll") + "\nDesea guardar el archivo a disco? (Esto es necesario para la ejecucion)", "Guardar?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION);
+        
+        
+        if (loadToDisk && ((FileFrame)desktopPane.getSelectedFrame()).getPreviouslySaved()) {
             ((FileFrame)desktopPane.getSelectedFrame()).selectLLVMConsole();
             ((FileFrame)desktopPane.getSelectedFrame()).clearLLVMConsole();
             ((FileFrame)desktopPane.getSelectedFrame()).clearLLVMCode();
             new File(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll")).delete();
-            
+
             output.setDelegate(delegateLLVMConsole);            
             if (compiler.compileLLVMProgram(desktopPane.getSelectedFrame().getTitle())) {           
                 output.setDelegate(delegateLLVMCode);
