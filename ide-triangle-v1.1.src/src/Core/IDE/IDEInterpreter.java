@@ -59,8 +59,8 @@ public class IDEInterpreter {
         }
 
         int exitCode = process.waitFor();
-        //writeToLLVMConsole("?? Código de salida: " + exitCode + "\n");
-        System.out.println("Código de salida: " + exitCode + "\n");
+        //writeToLLVMConsole("?? Cï¿½digo de salida: " + exitCode + "\n");
+        System.out.println("Cï¿½digo de salida: " + exitCode + "\n");
     }
     
     public void RunLLVM(String triFilePath) {
