@@ -769,16 +769,16 @@ public class Main extends javax.swing.JFrame {
                 // TREE  <<< ((FileFrame)desktopPane.getSelectedFrame()).setTree((DefaultMutableTreeNode)treeVisitor.visitProgram(compiler.getAST(), null));
                 // TABLE <<< ((FileFrame)desktopPane.getSelectedFrame()).setTable(tableVisitor.getTable(compiler.getAST()));
                 
-                System.out.println(" ___          ___");
-                System.out.println("(   \\________/   )");
+                System.out.println(" ___           ___");
+                System.out.println("(   \\_________/   )");
                 System.out.println(" \\    _     _    /");
-                System.out.println(" /   |O|   |O|   \\");
+                System.out.println(" /   |O|   |O|   \\ ");
                 System.out.println("|    |_|   |_|    |");
                 System.out.println("|  \"           \"  |");
                 System.out.println("|        O        |");
-                System.out.println(" \\                /");
-                System.out.println("  \\______________/");
-                System.out.println(" (___)      (___)");
+                System.out.println(" \\               /");
+                System.out.println("  \\_____________/");
+                System.out.println("  (___)     (___)");
                 
                 LLVMrunMenuItem.setEnabled(true);
                 LLVMbuttonRun.setEnabled(true);
@@ -987,7 +987,7 @@ public class Main extends javax.swing.JFrame {
     };
     ActionListener delegateInputLLVM = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            ((FileFrame)desktopPane.getSelectedFrame()).setInputEnabled(true);
+            ((FileFrame)desktopPane.getSelectedFrame()).setLLVMInputEnabled(true);
         }
     };
     
@@ -1004,7 +1004,7 @@ public class Main extends javax.swing.JFrame {
     };
     ActionListener delegateEnterLLVM = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            ((FileFrame)desktopPane.getSelectedFrame()).setInputEnabled(false);
+            ((FileFrame)desktopPane.getSelectedFrame()).setLLVMInputEnabled(false);
             inputLLVM.addInput(((FileFrame)desktopPane.getSelectedFrame()).getInputFieldText() + "\n");
             ((FileFrame)desktopPane.getSelectedFrame()).clearInputField();
         }
