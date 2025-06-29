@@ -1,0 +1,11 @@
+let
+  var a : Integer;
+  var b : Integer;
+  var resultado : Integer
+in
+  begin
+    getint(a);
+    getint(b);
+    resultado := a + b;
+    putint(resultado)
+  end
