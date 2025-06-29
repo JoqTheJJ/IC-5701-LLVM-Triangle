@@ -3,5 +3,5 @@ let
 in
   begin
     getint(var c);
-    put(c)
+    putint(c)
   end

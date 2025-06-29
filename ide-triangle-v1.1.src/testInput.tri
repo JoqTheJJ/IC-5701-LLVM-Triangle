@@ -3,6 +3,6 @@ let
 in
   begin
     getint(c);
-    put(c)
+    putint(c)
   end
 
