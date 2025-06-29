@@ -840,11 +840,13 @@ public class Main extends javax.swing.JFrame {
             //System.out.println(triFilePath);
             System.out.println(fileName);
             
-            //Interprete
-            //LLVMinterpreter.RunLLVM(fileName);
-            
             //Abre consola
-            openConsole();
+            openConsole(fileName);
+            
+            LLVMrunMenuItem.setEnabled(true);
+            LLVMbuttonRun.setEnabled(true);
+            LLVMcompileMenuItem.setEnabled(true);
+            LLVMbuttonCompile.setEnabled(true);
         } else {
             System.out.println("El archivo debe estar guardado como .tri.\n");
         }
@@ -853,14 +855,34 @@ public class Main extends javax.swing.JFrame {
         //LLVMinterpreter.Run(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
     }//GEN-LAST:event_LLVMbuttonRunrunMenuItemActionPerformed
 
-    public static void openConsole() {
+    public static void openConsole(String triFilePath) {
         try {
-            ProcessBuilder builder = new ProcessBuilder("powershell.exe", "-NoExit", "-Command", "echo Hola desde PowerShell");
-            builder.inheritIO();
+            String fileBase = triFilePath.replaceFirst("[.][^.]+$", "");
+            String llFile = fileBase + ".ll";
+            String exeFile = fileBase + ".exe";
+            String ioFile = new File("runtime/io.ll").getAbsolutePath();
+            
+            //String kirby = kirbyPrinter();
+            
+            String c1 = "echo Triangle_LLVM_Interpreter_K1rb1_2.2; ";
+            String c2 = "clang " + llFile + " " + ioFile + " -o " + exeFile + "; ";
+            String c3 = exeFile + "; ";
+            
+            String commands = c1 + c2 + c3;
+            ProcessBuilder builder = new ProcessBuilder(
+                "cmd.exe", "/c", 
+                "start", "powershell.exe", "-NoExit", "-Command", commands
+            );
             builder.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public String kirbyPrinter() {
+        String kirby = "";
+        
+        return kirby;
     }
     
     //    
