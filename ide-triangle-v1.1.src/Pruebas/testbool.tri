@@ -1,0 +1,10 @@
+let
+  var flag : Boolean
+in
+  begin
+    flag := false;
+    if flag then
+      putint(1)
+    else
+      putint(0)
+  end

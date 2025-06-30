@@ -1,4 +1,0 @@
-let
-  const pi ~ 3
-in
-  putint(pi)

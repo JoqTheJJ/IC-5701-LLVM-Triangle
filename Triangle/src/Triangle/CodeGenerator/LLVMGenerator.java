@@ -82,34 +82,42 @@ import Triangle.AbstractSyntaxTrees.VnameExpression;
 import Triangle.AbstractSyntaxTrees.WhileCommand;
 public class LLVMGenerator implements Visitor {
 
-    private StringBuilder code;
+    private StringBuilder codeMain;
+    private StringBuilder codeFuncs;
+    private StringBuilder currentCode = codeMain;
+
     private int tempCount;
     private final Map<Declaration, String> llvmNames = new HashMap<>();
 
 
     public LLVMGenerator() {
-        code = new StringBuilder();
+        
+        codeMain = new StringBuilder();
+        codeFuncs = new StringBuilder();
         tempCount = 0;
     }
 
-    public String generate(Program program) {
-        code.insert(0, "@true = global i32 1\n@false = global i32 0\n");
-        code.insert(0, "declare i32 @readInt()\n");
-        code.insert(0, "declare void @printInt(i32)\n");
-        code.insert(0, "declare i8 @readChar()\n");
-        code.insert(0, "declare void @printChar(i8)\n");
+        public String generate(Program program) {
+        // Cabeceras y declaraciones
+        codeFuncs.append("@true = global i32 1\n@false = global i32 0\n");
+        codeFuncs.append("declare i32 @readInt()\n");
+        codeFuncs.append("declare void @printInt(i32)\n");
+        codeFuncs.append("declare i8 @readChar()\n");
+        codeFuncs.append("declare void @printChar(i8)\n");
 
-
-        code.append("define i32 @main() {\n");
+        // Cuerpo principal
+        codeMain.append("define i32 @main() {\n");
         program.visit(this, null);
-        code.append("  ret i32 0\n");
-        code.append("}\n");
-        return code.toString();
-    }
+        codeMain.append("  ret i32 0\n");
+        codeMain.append("}\n");
 
-    private String newTemp() {
-        return "%t" + (tempCount++);
-    }
+        // Devolver el LLVM final
+        return codeFuncs.toString() + codeMain.toString();
+        }
+        private String newTemp() {
+            return "%t" + (tempCount++);
+        }
+
 
     // Implementa los métodos visit... para cada nodo del AST que te interesa
 
@@ -120,7 +128,7 @@ public class LLVMGenerator implements Visitor {
 
     public Object visitIntegerLiteral(IntegerLiteral il, Object o) {
         String temp = newTemp();
-        code.append("  ").append(temp).append(" = add i32 ").append(il.spelling).append(", 0\n");
+        codeMain.append("  ").append(temp).append(" = add i32 ").append(il.spelling).append(", 0\n");
         return temp;
     }
 
@@ -142,7 +150,7 @@ public class LLVMGenerator implements Visitor {
                 String varName = llvmNames.get(simple.D);
                 if (varName == null) varName = "@" + simple.I.spelling;
 
-                code.append("  store i32 ").append(val)
+                codeMain.append("  store i32 ").append(val)
                     .append(", ptr ").append(varName).append("\n");
             }
         }
@@ -154,11 +162,11 @@ public class LLVMGenerator implements Visitor {
     String value = (String) cmd.APS.visit(this, o);
 
     if (cmd.I.spelling.equals("print") || cmd.I.spelling.equals("putint")) {
-        code.append("  call void @printInt(i32 ").append(value).append(")\n");
+        codeMain.append("  call void @printInt(i32 ").append(value).append(")\n");
     } else if (cmd.I.spelling.equals("put")) {
         String temp = newTemp();
-        code.append("  ").append(temp).append(" = trunc i32 ").append(value).append(" to i8\n");
-        code.append("  call void @printChar(i8 ").append(temp).append(")\n");
+        codeMain.append("  ").append(temp).append(" = trunc i32 ").append(value).append(" to i8\n");
+        codeMain.append("  call void @printChar(i8 ").append(temp).append(")\n");
     }
 
     return null;
@@ -178,30 +186,30 @@ public class LLVMGenerator implements Visitor {
         // Evaluar la condición
         String condValue = (String) ast.E.visit(this, o);
         String condBool = newTemp();
-        code.append("  ").append(condBool)
+        codeMain.append("  ").append(condBool)
             .append(" = icmp ne i32 ").append(condValue).append(", 0\n");
-        code.append("  br i1 ").append(condBool)
+        codeMain.append("  br i1 ").append(condBool)
             .append(", label %").append(thenLabel)
             .append(", label %").append(elseLabel).append("\n");
 
         // Bloque THEN
-        code.append(thenLabel).append(":\n");
+        codeMain.append(thenLabel).append(":\n");
         ast.C1.visit(this, o);
-        code.append("  br label %").append(endLabel).append("\n");
+        codeMain.append("  br label %").append(endLabel).append("\n");
 
         // Bloque ELSE
-        code.append(elseLabel).append(":\n");
+        codeMain.append(elseLabel).append(":\n");
         ast.C2.visit(this, o);
-        code.append("  br label %").append(endLabel).append("\n");
+        codeMain.append("  br label %").append(endLabel).append("\n");
 
         // Fin del IF
-        code.append(endLabel).append(":\n");
+        codeMain.append(endLabel).append(":\n");
 
         return null;
     }
 
 
-    @Override
+    
     public Object visitLetCommand(LetCommand lc, Object o) {
         // Declaraciones: asumimos variables globales por ahora
         lc.D.visit(this, o); // visita la declaFración
@@ -224,34 +232,34 @@ public class LLVMGenerator implements Visitor {
         String endLabel = "end" + tempCount++;
 
         // Ir al bloque de condición
-        code.append("  br label %").append(loopLabel).append("\n");
+        codeMain.append("  br label %").append(loopLabel).append("\n");
 
         // Condición del while
-        code.append(loopLabel).append(":\n");
+        codeMain.append(loopLabel).append(":\n");
         String condValue = (String) ast.E.visit(this, o);  // debe retornar i1
-        code.append("  br i1 ").append(condValue)
+        codeMain.append("  br i1 ").append(condValue)
             .append(", label %").append(bodyLabel)
             .append(", label %").append(endLabel).append("\n");
 
         // Cuerpo del while
-        code.append(bodyLabel).append(":\n");
+        codeMain.append(bodyLabel).append(":\n");
         ast.C.visit(this, o);
-        code.append("  br label %").append(loopLabel).append("\n");
+        codeMain.append("  br label %").append(loopLabel).append("\n");
 
         // Fin
-        code.append(endLabel).append(":\n");
+        codeMain.append(endLabel).append(":\n");
 
         return null;
     }
 
 
 
-    @Override
+    
     public Object visitArrayExpression(ArrayExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
-    @Override
+    
     public Object visitBinaryExpression(BinaryExpression ast, Object o) {
         String left = (String) ast.E1.visit(this, o);
         String right = (String) ast.E2.visit(this, o);
@@ -260,35 +268,35 @@ public class LLVMGenerator implements Visitor {
 
         switch (op) {
             case "+":
-                code.append("  ").append(temp).append(" = add i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = add i32 ").append(left).append(", ").append(right).append("\n");
                 break;
             case "-":
-                code.append("  ").append(temp).append(" = sub i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = sub i32 ").append(left).append(", ").append(right).append("\n");
                 break;
             case "*":
-                code.append("  ").append(temp).append(" = mul i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = mul i32 ").append(left).append(", ").append(right).append("\n");
                 break;
             case "/":
-                code.append("  ").append(temp).append(" = sdiv i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = sdiv i32 ").append(left).append(", ").append(right).append("\n");
                 break;
             case "<":
-                code.append("  ").append(temp).append(" = icmp slt i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = icmp slt i32 ").append(left).append(", ").append(right).append("\n");
                 break;
 
             case "<=":
-                code.append("  ").append(temp).append(" = icmp sle i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = icmp sle i32 ").append(left).append(", ").append(right).append("\n");
                 return castBoolToInt(temp);
             case "==":
-                code.append("  ").append(temp).append(" = icmp eq i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = icmp eq i32 ").append(left).append(", ").append(right).append("\n");
                 return castBoolToInt(temp);
             case "!=":
-                code.append("  ").append(temp).append(" = icmp ne i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = icmp ne i32 ").append(left).append(", ").append(right).append("\n");
                 return castBoolToInt(temp);
             case ">=":
-                code.append("  ").append(temp).append(" = icmp sge i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = icmp sge i32 ").append(left).append(", ").append(right).append("\n");
                 return castBoolToInt(temp);
             case ">":
-                code.append("  ").append(temp).append(" = icmp sgt i32 ").append(left).append(", ").append(right).append("\n");
+                codeMain.append("  ").append(temp).append(" = icmp sgt i32 ").append(left).append(", ").append(right).append("\n");
                 return castBoolToInt(temp);
             default:
                 throw new UnsupportedOperationException("Operador no soportado: " + op);
@@ -300,49 +308,41 @@ public class LLVMGenerator implements Visitor {
         
     private String castBoolToInt(String boolVar) {
         String intVar = newTemp();
-        code.append("  ").append(intVar).append(" = zext i1 ").append(boolVar).append(" to i32\n");
+        codeMain.append("  ").append(intVar).append(" = zext i1 ").append(boolVar).append(" to i32\n");
         return intVar;
     }
 
-
-
-    
-
-    
     public Object visitCallExpression(CallExpression expr, Object o) {
         String funcName = "@" + expr.I.spelling;
+        String arg = (String) expr.APS.visit(this, o);
         String temp = newTemp();
-        code.append("  ").append(temp).append(" = call i32 ").append(funcName).append("()\n");
+        codeMain.append("  ").append(temp).append(" = call i32 ")
+                .append(funcName).append("(i32 ").append(arg).append(")\n");
         return temp;
     }
 
 
-
-
-
-
-    
     public Object visitCharacterExpression(CharacterExpression ast, Object o) {
         // Obtener el literal de carácter, por ejemplo: 'a'
     char c = ast.CL.spelling.charAt(1);  // char literal como 'a'
     int ascii = (int) c;
 
     String temp = newTemp();
-    code.append("  ").append(temp).append(" = add i32 ").append(ascii).append(", 0\n");
+    codeMain.append("  ").append(temp).append(" = add i32 ").append(ascii).append(", 0\n");
     return temp;
     }
 
-    @Override
+   
     public Object visitEmptyExpression(EmptyExpression ast, Object o) {
         return "0";
     }
 
     @Override
     public Object visitIfExpression(IfExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
-    @Override
+    
     public Object visitIntegerExpression(IntegerExpression ast, Object o) {
         return ast.IL.visit(this, o);  // IL es el IntegerLiteral
     }
@@ -353,17 +353,17 @@ public class LLVMGenerator implements Visitor {
         return ast.E.visit(this, o);
     }
 
-    @Override
+    
     public Object visitRecordExpression(RecordExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitUnaryExpression(UnaryExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
-    @Override
+   
     public Object visitVnameExpression(VnameExpression ast, Object o) {
         return ast.V.visit(this, o);  // esto permite que n dentro de print(n) funcione
     }
@@ -371,11 +371,11 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     
-    @Override
+   
     public Object visitConstDeclaration(ConstDeclaration ast, Object o) {
         String constName = "@" + ast.I.spelling;
         String value = (String) ast.E.visit(this, o);
@@ -392,10 +392,10 @@ public class LLVMGenerator implements Visitor {
             literal = "0";
         }
 
-    code.insert(0, constName + " = global i32 " + literal + "\n");
-    llvmNames.put(ast, constName);
-    return null;
-}
+        codeMain.insert(0, constName + " = global i32 " + literal + "\n");
+        llvmNames.put(ast, constName);
+        return null;
+    }
 
 
     private String extractIntValue(String temp) {
@@ -410,34 +410,51 @@ public class LLVMGenerator implements Visitor {
 
 
 
+    
+
     public Object visitFuncDeclaration(FuncDeclaration ast, Object o) {
         String funcName = "@" + ast.I.spelling;
-        StringBuilder oldCode = code;
-        StringBuilder funcCode = new StringBuilder();
 
-        // Registrar nombre
-        llvmNames.put(ast, funcName);
+        ConstFormalParameter param = (ConstFormalParameter)
+                                      ((SingleFormalParameterSequence) ast.FPS).FP;
+        String paramName = "%" + param.I.spelling;
+        String localParam = "%" + param.I.spelling + ".addr";
 
-        // Parámetros (no soportamos aún)
-        funcCode.append("define i32 ").append(funcName).append("() {\n");
 
-        LLVMGenerator bodyGen = new LLVMGenerator();
-        String result = (String) ast.E.visit(bodyGen, o);
-        funcCode.append(bodyGen.code);
+        StringBuilder previousCode = currentCode;
+        currentCode = codeFuncs;
 
-        funcCode.append("  ret i32 ").append(result).append("\n");
-        funcCode.append("}\n\n");
 
-        // Insertar función antes del main
-        oldCode.insert(0, funcCode.toString());
+        currentCode.append("define i32 ").append(funcName)
+                   .append("(i32 ").append(paramName).append(") {\n");
+
+        // Asignar parámetro a variable local
+        currentCode.append("  ").append(localParam).append(" = alloca i32\n");
+        currentCode.append("  store i32 ").append(paramName)
+                    .append(", ptr ").append(localParam).append("\n");
+
+        llvmNames.put(param, localParam);
+
+        // Cuerpo: obtener valor de retorno desde la expresión
+        String retValue = (String) ast.E.visit(this, o);
+
+        currentCode.append("  ret i32 ").append(retValue).append("\n");
+        currentCode.append("}\n");
+
+        // Restaurar el generador de código principal
+        currentCode = previousCode;
 
         return null;
     }
 
 
+
+
+
+
     @Override
     public Object visitProcDeclaration(ProcDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
 
@@ -451,120 +468,120 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitTypeDeclaration(TypeDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitUnaryOperatorDeclaration(UnaryOperatorDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
-    @Override
+    
     public Object visitVarDeclaration(VarDeclaration decl, Object o) {
         String suffix = (o instanceof String) ? "." + o : "";
         String varName = "@" + decl.I.spelling;
         llvmNames.put(decl, varName);
-        code.insert(0, varName + " = global i32 0\n");
+        codeMain.insert(0, varName + " = global i32 0\n");
         return null;
     }
 
     @Override
     public Object visitMultipleArrayAggregate(MultipleArrayAggregate ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitSingleArrayAggregate(SingleArrayAggregate ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitMultipleRecordAggregate(MultipleRecordAggregate ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitSingleRecordAggregate(SingleRecordAggregate ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitConstFormalParameter(ConstFormalParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitFuncFormalParameter(FuncFormalParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitProcFormalParameter(ProcFormalParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitVarFormalParameter(VarFormalParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitEmptyFormalParameterSequence(EmptyFormalParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitMultipleFormalParameterSequence(MultipleFormalParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitSingleFormalParameterSequence(SingleFormalParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
-    @Override
+   
     public Object visitConstActualParameter(ConstActualParameter ast, Object o) {
         return ast.E.visit(this, o);
     }
 
     @Override
     public Object visitFuncActualParameter(FuncActualParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitProcActualParameter(ProcActualParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitVarActualParameter(VarActualParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitEmptyActualParameterSequence(EmptyActualParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitMultipleActualParameterSequence(MultipleActualParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
-    @Override
+    
     public Object visitSingleActualParameterSequence(SingleActualParameterSequence ast, Object o) {
         return ast.AP.visit(this, o);
     }
 
     @Override
     public Object visitAnyTypeDenoter(AnyTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitArrayTypeDenoter(ArrayTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
    
@@ -578,77 +595,77 @@ public class LLVMGenerator implements Visitor {
 
     @Override
     public Object visitErrorTypeDenoter(ErrorTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitSimpleTypeDenoter(SimpleTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitIntTypeDenoter(IntTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitRecordTypeDenoter(RecordTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitMultipleFieldTypeDenoter(MultipleFieldTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitSingleFieldTypeDenoter(SingleFieldTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitCharacterLiteral(CharacterLiteral ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitIdentifier(Identifier ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     @Override
     public Object visitOperator(Operator ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
     
     public Object visitDotVname(DotVname ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
  
-@Override
-public Object visitSimpleVname(SimpleVname ast, Object o) {
-    Declaration decl = (Declaration) ast.I.decl;  // <--- esta línea es la clave
-    System.out.println(">> visitSimpleVname: " + ast.I.spelling + ", decl=" + decl);
 
-    if (decl instanceof VarDeclaration || decl instanceof ConstDeclaration) {
+    public Object visitSimpleVname(SimpleVname ast, Object o) {
+        Declaration decl = (Declaration) ast.I.decl;
+
         String varName = llvmNames.get(decl);
         if (varName == null) {
             varName = "@" + ast.I.spelling;
         }
+
         String temp = newTemp();
-        code.append("  ").append(temp).append(" = load i32, ptr ").append(varName).append("\n");
+        if (varName.startsWith("%")) {
+            codeFuncs.append("  ").append(temp).append(" = load i32, ptr ").append(varName).append("\n");
+        } else {
+            codeMain.append("  ").append(temp).append(" = load i32, ptr ").append(varName).append("\n");
+        }
         return temp;
     }
 
 
-    return null;
-}
-
-    @Override
+  
     public Object visitSubscriptVname(SubscriptVname ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
     }
 
 
@@ -663,14 +680,14 @@ public Object visitSimpleVname(SimpleVname ast, Object o) {
 
                 // Llamar a readChar()
                 String temp = newTemp();
-                code.append("  ").append(temp).append(" = call i8 @readChar()\n");
+                codeMain.append("  ").append(temp).append(" = call i8 @readChar()\n");
 
                 // Extender a i32 si es necesario (para almacenarlo en int)
                 String extended = newTemp();
-                code.append("  ").append(extended).append(" = zext i8 ").append(temp).append(" to i32\n");
+                codeMain.append("  ").append(extended).append(" = zext i8 ").append(temp).append(" to i32\n");
 
                 // Guardar en variable destino
-                code.append("  store i32 ").append(extended).append(", ptr ").append(varName).append("\n");
+                codeMain.append("  store i32 ").append(extended).append(", ptr ").append(varName).append("\n");
             }
         }
 
@@ -687,10 +704,10 @@ public Object visitSimpleVname(SimpleVname ast, Object o) {
 
                 // Llamar a readInt()
                 String temp = newTemp();
-                code.append("  ").append(temp).append(" = call i32 @readInt()\n");
+                codeMain.append("  ").append(temp).append(" = call i32 @readInt()\n");
 
                 // Guardar en variable destino
-                code.append("  store i32 ").append(temp).append(", ptr ").append(varName).append("\n");
+                codeMain.append("  store i32 ").append(temp).append(", ptr ").append(varName).append("\n");
             }
         }
 

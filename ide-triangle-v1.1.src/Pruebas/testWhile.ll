@@ -1,10 +1,10 @@
-@x = global i32 0
-declare void @printChar(i8)
-declare i8 @readChar()
-declare void @printInt(i32)
-declare i32 @readInt()
 @true = global i32 1
 @false = global i32 0
+declare i32 @readInt()
+declare void @printInt(i32)
+declare i8 @readChar()
+declare void @printChar(i8)
+@x = global i32 0
 define i32 @main() {
   %t0 = add i32 0, 0
   store i32 %t0, ptr @x

@@ -1,0 +1,11 @@
+let
+  var x : Integer
+in
+   
+    begin
+        x := 7;
+        if x > 5 then
+            putint (1)
+        else
+            putint (0)
+    end

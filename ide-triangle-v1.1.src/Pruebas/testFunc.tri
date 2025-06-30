@@ -1,0 +1,6 @@
+let
+  func identidad(n : Integer) : Integer ~ n
+in
+  begin
+    putint(identidad(59))
+  end
