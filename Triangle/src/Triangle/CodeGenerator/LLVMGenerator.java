@@ -256,7 +256,7 @@ public class LLVMGenerator implements Visitor {
 
     
     public Object visitArrayExpression(ArrayExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     
@@ -337,9 +337,9 @@ public class LLVMGenerator implements Visitor {
         return "0";
     }
 
-    @Override
+    
     public Object visitIfExpression(IfExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     
@@ -355,12 +355,12 @@ public class LLVMGenerator implements Visitor {
 
     
     public Object visitRecordExpression(RecordExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitUnaryExpression(UnaryExpression ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
    
@@ -369,9 +369,9 @@ public class LLVMGenerator implements Visitor {
     }
 
 
-    @Override
+    
     public Object visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     
@@ -452,9 +452,9 @@ public class LLVMGenerator implements Visitor {
 
 
 
-    @Override
+    
     public Object visitProcDeclaration(ProcDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
 
@@ -466,14 +466,14 @@ public class LLVMGenerator implements Visitor {
     }
 
 
-    @Override
+    
     public Object visitTypeDeclaration(TypeDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitUnaryOperatorDeclaration(UnaryOperatorDeclaration ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
     
     public Object visitVarDeclaration(VarDeclaration decl, Object o) {
@@ -484,59 +484,59 @@ public class LLVMGenerator implements Visitor {
         return null;
     }
 
-    @Override
+    
     public Object visitMultipleArrayAggregate(MultipleArrayAggregate ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitSingleArrayAggregate(SingleArrayAggregate ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitMultipleRecordAggregate(MultipleRecordAggregate ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitSingleRecordAggregate(SingleRecordAggregate ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitConstFormalParameter(ConstFormalParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitFuncFormalParameter(FuncFormalParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitProcFormalParameter(ProcFormalParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitVarFormalParameter(VarFormalParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitEmptyFormalParameterSequence(EmptyFormalParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitMultipleFormalParameterSequence(MultipleFormalParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitSingleFormalParameterSequence(SingleFormalParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
    
@@ -544,29 +544,28 @@ public class LLVMGenerator implements Visitor {
         return ast.E.visit(this, o);
     }
 
-    @Override
+    
     public Object visitFuncActualParameter(FuncActualParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitProcActualParameter(ProcActualParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+  
     public Object visitVarActualParameter(VarActualParameter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
     public Object visitEmptyActualParameterSequence(EmptyActualParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+   
     public Object visitMultipleActualParameterSequence(MultipleActualParameterSequence ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     
@@ -574,14 +573,14 @@ public class LLVMGenerator implements Visitor {
         return ast.AP.visit(this, o);
     }
 
-    @Override
+    
     public Object visitAnyTypeDenoter(AnyTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitArrayTypeDenoter(ArrayTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
    
@@ -593,54 +592,53 @@ public class LLVMGenerator implements Visitor {
         return "i8";
     }
 
-    @Override
+   
     public Object visitErrorTypeDenoter(ErrorTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
     public Object visitSimpleTypeDenoter(SimpleTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitIntTypeDenoter(IntTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+   
     public Object visitRecordTypeDenoter(RecordTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitMultipleFieldTypeDenoter(MultipleFieldTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitSingleFieldTypeDenoter(SingleFieldTypeDenoter ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitCharacterLiteral(CharacterLiteral ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+   
     public Object visitIdentifier(Identifier ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
+    
     public Object visitOperator(Operator ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     
     public Object visitDotVname(DotVname ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
  
@@ -665,7 +663,7 @@ public class LLVMGenerator implements Visitor {
 
   
     public Object visitSubscriptVname(SubscriptVname ast, Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/CodeMain/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
 
