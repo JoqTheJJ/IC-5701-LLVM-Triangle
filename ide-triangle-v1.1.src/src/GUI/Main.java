@@ -756,29 +756,22 @@ public class Main extends javax.swing.JFrame {
             saveMenuItemActionPerformed(null);
         }
         
-        if (((FileFrame)desktopPane.getSelectedFrame()).getPreviouslySaved()) {
+        boolean loadToDisk = (JOptionPane.showConfirmDialog(this, desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll") + "\nDesea guardar el archivo a disco? (Esto es necesario para la ejecucion)", "Guardar?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION);
+        
+        
+        if (loadToDisk && ((FileFrame)desktopPane.getSelectedFrame()).getPreviouslySaved()) {
             ((FileFrame)desktopPane.getSelectedFrame()).selectLLVMConsole();
             ((FileFrame)desktopPane.getSelectedFrame()).clearLLVMConsole();
             ((FileFrame)desktopPane.getSelectedFrame()).clearLLVMCode();
             new File(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll")).delete();
-            
+
             output.setDelegate(delegateLLVMConsole);            
             if (compiler.compileLLVMProgram(desktopPane.getSelectedFrame().getTitle())) {           
+                kirbyPrinterConsole(" COMPILATION SUCCESFUL ");
                 output.setDelegate(delegateLLVMCode);
                 LLVMDisassembler(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
                 // TREE  <<< ((FileFrame)desktopPane.getSelectedFrame()).setTree((DefaultMutableTreeNode)treeVisitor.visitProgram(compiler.getAST(), null));
                 // TABLE <<< ((FileFrame)desktopPane.getSelectedFrame()).setTable(tableVisitor.getTable(compiler.getAST()));
-                
-                System.out.println(" ___           ___");
-                System.out.println("(   \\_________/   )");
-                System.out.println(" \\    _     _    /");
-                System.out.println(" /   |O|   |O|   \\ ");
-                System.out.println("|    |_|   |_|    |");
-                System.out.println("|  \"           \"  |");
-                System.out.println("|        O        |");
-                System.out.println(" \\               /");
-                System.out.println("  \\_____________/");
-                System.out.println("  (___)     (___)");
                 
                 LLVMrunMenuItem.setEnabled(true);
                 LLVMbuttonRun.setEnabled(true);
@@ -855,20 +848,24 @@ public class Main extends javax.swing.JFrame {
         //LLVMinterpreter.Run(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
     }//GEN-LAST:event_LLVMbuttonRunrunMenuItemActionPerformed
 
-    public static void openConsole(String triFilePath) {
+    public void openConsole(String triFilePath) {
         try {
             String fileBase = triFilePath.replaceFirst("[.][^.]+$", "");
             String llFile = fileBase + ".ll";
             String exeFile = fileBase + ".exe";
             String ioFile = new File("runtime/io.ll").getAbsolutePath();
             
-            //String kirby = kirbyPrinter();
+            String kirby = kirbyPrinter();
             
             String c1 = "echo Triangle_LLVM_Interpreter_K1rb1_2.2; ";
             String c2 = "clang " + llFile + " " + ioFile + " -o " + exeFile + "; ";
-            String c3 = exeFile + "; ";
+            String c3 = "echo Ejecutando...; ";
+            String c4 = exeFile + "; ";
             
-            String commands = c1 + c2 + c3;
+            
+            String kirbyCommand = kirby.replace("\"", "`\"");
+            String commands = c1 + kirbyCommand + c2 + c3 + c4;
+
             ProcessBuilder builder = new ProcessBuilder(
                 "cmd.exe", "/c", 
                 "start", "powershell.exe", "-NoExit", "-Command", commands
@@ -879,12 +876,41 @@ public class Main extends javax.swing.JFrame {
         }
     }
     
+    public String kirbySimplePrinter() {
+        String kirby = "";
+        kirby +="echo `(.`'o`'.`); ";
+        return kirby;
+    }
+    
     public String kirbyPrinter() {
         String kirby = "";
+        kirby +="echo .___...........___; ";
+        kirby +="echo `(...\\_________/...`); ";
+        kirby +="echo .\\...._....._..../; ";
+        kirby +="echo ./...`|O`|...`|O`|...\\; ";
+        kirby +="echo `|....`|_`|...`|_`|....`|; ";
+        kirby +="echo `|..w...........w..`|; ";
+        kirby +="echo `|........O........`|; ";
+        kirby +="echo .\\.............../; ";
+        kirby +="echo ..\\_____________/; ";
+        kirby +="echo ..`(___`).....`(___`); ";
         
         return kirby;
     }
     
+    public void kirbyPrinterConsole(String msg) {
+        System.out.println(" ___           ___");
+        System.out.println("(   \\_________/   )");
+        System.out.println(" \\    _     _    /");
+        System.out.println(" /   |O|   |O|   \\ ");
+        System.out.println("|    |_|   |_|    |");
+        System.out.println("|  \"           \"  |");
+        System.out.println("|        O        |");
+        System.out.println(" \\               /");
+        System.out.println("  \\_____________/");
+        System.out.println("  (___)     (___)");
+        System.out.println(msg);
+    }
     //    
            
     // <editor-fold defaultstate="collapsed" desc=" Delegates and Listeners ">    
