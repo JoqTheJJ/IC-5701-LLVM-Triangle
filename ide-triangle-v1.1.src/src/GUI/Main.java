@@ -767,6 +767,7 @@ public class Main extends javax.swing.JFrame {
 
             output.setDelegate(delegateLLVMConsole);            
             if (compiler.compileLLVMProgram(desktopPane.getSelectedFrame().getTitle())) {           
+                kirbyPrinterConsole(" COMPILATION SUCCESFUL ");
                 output.setDelegate(delegateLLVMCode);
                 LLVMDisassembler(desktopPane.getSelectedFrame().getTitle().replace(".tri", ".ll"));
                 // TREE  <<< ((FileFrame)desktopPane.getSelectedFrame()).setTree((DefaultMutableTreeNode)treeVisitor.visitProgram(compiler.getAST(), null));
@@ -897,7 +898,7 @@ public class Main extends javax.swing.JFrame {
         return kirby;
     }
     
-    public void kirbyPrinterConsole() {
+    public void kirbyPrinterConsole(String msg) {
         System.out.println(" ___           ___");
         System.out.println("(   \\_________/   )");
         System.out.println(" \\    _     _    /");
@@ -908,6 +909,7 @@ public class Main extends javax.swing.JFrame {
         System.out.println(" \\               /");
         System.out.println("  \\_____________/");
         System.out.println("  (___)     (___)");
+        System.out.println(msg);
     }
     //    
            
