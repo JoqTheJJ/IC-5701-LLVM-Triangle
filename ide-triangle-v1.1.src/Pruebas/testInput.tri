@@ -1,8 +1,9 @@
 let
-  var c : Integer
+  var c : Char
 in
   begin
-    getint(c);
-    putint(c)
+    getchar(var c);
+    put(c)
   end
+
 
